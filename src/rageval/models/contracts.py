@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -44,7 +44,7 @@ class DocumentRecord(ContractModel):
     source_type: SourceType
     domain: Domain
     checksum_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    ingested_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    ingested_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, object] = Field(default_factory=dict)
 
 
