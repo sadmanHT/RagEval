@@ -18,7 +18,7 @@ from rageval.testing.fakes import (
 
 
 def main() -> None:
-    settings = Settings(_env_file=None)
+    settings = Settings()
     providers = (
         (FakeEmbeddingProvider(), EmbeddingProvider),
         (FakeRerankerProvider(), RerankerProvider),
