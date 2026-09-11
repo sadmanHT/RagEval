@@ -24,9 +24,7 @@ def make_document_id(*, checksum_sha256: str, source_uri: str) -> str:
     return f"doc_{stable_digest(checksum_sha256, source_uri)[:32]}"
 
 
-def make_chunk_id(
-    *, document_id: str, ordinal: int, config_fingerprint: str, text: str
-) -> str:
+def make_chunk_id(*, document_id: str, ordinal: int, config_fingerprint: str, text: str) -> str:
     """Create a deterministic chunk identifier from document/config/content identity."""
     digest = stable_digest(document_id, str(ordinal), config_fingerprint, text)
     return f"chk_{digest[:32]}"
