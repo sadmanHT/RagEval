@@ -52,6 +52,8 @@ jobs:
           python scripts/wait_for_services.py
       - name: Integration tests
         run: pytest -q tests/integration
+      - name: Cleaning fixture stats
+        run: python scripts/cleaning_fixture_report.py
       - name: Package smoke test
         run: python -m rageval.smoke
       - name: Full regression suite
