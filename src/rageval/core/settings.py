@@ -21,9 +21,15 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     qdrant_url: str = "http://localhost:6333"
+    qdrant_collection_base: str = "rageval_dense"
+    qdrant_collection_version: str = "v1"
     redis_url: str = "redis://localhost:6379/0"
 
     embedding_provider: Literal["fake", "openai", "local"] = "fake"
+    embedding_model: str = "text-embedding-3-large"
+    embedding_dimensions: int = 3072
+    local_embedding_dimensions: int = 64
+    openai_base_url: str = "https://api.openai.com/v1"
     reranker_provider: Literal["fake", "cohere", "local"] = "fake"
     generation_provider: Literal["fake", "openai", "anthropic", "local"] = "fake"
     tracing_provider: Literal["disabled", "langfuse"] = "disabled"
@@ -62,4 +68,6 @@ class Settings(BaseSettings):
         if missing:
             keys = ", ".join(sorted(set(missing)))
             raise ValueError(f"Missing required provider credentials: {keys}")
+        if self.embedding_dimensions < 1 or self.local_embedding_dimensions < 4:
+            raise ValueError("embedding dimensions must be positive and local dimensions >= 4")
         return self
