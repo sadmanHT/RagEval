@@ -4,7 +4,7 @@ RAG-Eval is a production-oriented Retrieval-Augmented Generation system whose pr
 
 ## Current status
 
-Phases 1–7 are merged and verified on `main`. Phase 8 concurrent hybrid retrieval is implemented and accepted on PR #8, with merge/post-merge closure still pending. The current pipeline covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking strategies, reproducible dense retrieval over versioned Qdrant collections, deterministic BM25/BM25+ lexical retrieval, and rank-based hybrid fusion over the same canonical chunk identities.
+Phases 1–8 are merged and verified on `main`. The current pipeline covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking strategies, reproducible dense retrieval over versioned Qdrant collections, deterministic BM25/BM25+ lexical retrieval, and rank-based hybrid fusion over the same canonical chunk identities. Phase 9 — reranking and multi-hop retrieval service — is next.
 
 Phase 6 dense retrieval consumes canonical Phase 5 chunks, embeds them behind a replaceable provider boundary, preserves stable chunk/configuration/provenance identity in reconstructable Qdrant payloads, and returns the canonical `RetrievalResult` contract. The deterministic/local acceptance path uses a local hashed embedding adapter for mechanics and real-Qdrant integration only; live OpenAI validation remains unrun without credentials.
 
@@ -108,7 +108,5 @@ Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
 - Local-hash dense evidence and tiny sparse/hybrid fixtures validate mechanics, not learned semantic quality or production retrieval quality.
 - No chunking or retrieval strategy is considered preferable without representative evaluation evidence.
 - Every phase must pass its own tests and the cumulative regression suite before completion.
-
-Phase 9 — reranking and multi-hop retrieval service — is next after Phase 8 merge closure.
 
 See `docs/implementation-state.md`, `docs/architecture-decisions.md`, `docs/phases/`, and `docs/plans/`.
