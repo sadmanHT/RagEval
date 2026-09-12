@@ -1,0 +1,86 @@
+[
+  {
+    "name": "financial_noisy",
+    "domain": "financial",
+    "source_type": "pdf",
+    "elements": [
+      {"element_id": "elm_fin_001", "kind": "header", "text": "ACME Annual Report 2024 | 1", "page_number": 1, "metadata": {"source_offset": {"page_index": 0}}},
+      {"element_id": "elm_fin_002", "kind": "text", "text": "Revenue\u00a0was   $1,234.50  (12.5%).", "page_number": 1, "metadata": {"section_hint": "Results", "source_offset": {"page_index": 0, "block_index": 1}}},
+      {"element_id": "elm_fin_003", "kind": "text", "text": "CONFIDENTIAL — forward-looking statement disclaimer.", "page_number": 1, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 0, "block_index": 2}}},
+      {"element_id": "elm_fin_004", "kind": "footer", "text": "Page 1 of 3", "page_number": 1, "metadata": {"source_offset": {"page_index": 0}}},
+      {"element_id": "elm_fin_005", "kind": "header", "text": "ACME Annual Report 2024 | 2", "page_number": 2, "metadata": {"source_offset": {"page_index": 1}}},
+      {"element_id": "elm_fin_006", "kind": "table", "text": " Metric  \t Value \n Revenue \t $1,234.50 \n Margin \t 12.5% ", "page_number": 2, "metadata": {"table_html": "<table><tr><td>Metric</td><td>Value</td></tr><tr><td>Revenue</td><td>$1,234.50</td></tr><tr><td>Margin</td><td>12.5%</td></tr></table>", "bbox": [10.0, 20.0, 500.0, 300.0], "section_hint": "Results", "source_offset": {"page_index": 1, "table_index": 0}}},
+      {"element_id": "elm_fin_007", "kind": "text", "text": "CONFIDENTIAL — forward-looking statement disclaimer.", "page_number": 2, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 1, "block_index": 3}}},
+      {"element_id": "elm_fin_008", "kind": "footer", "text": "Page 2 of 3", "page_number": 2, "metadata": {"source_offset": {"page_index": 1}}},
+      {"element_id": "elm_fin_009", "kind": "header", "text": "ACME Annual Report 2024 | 3", "page_number": 3, "metadata": {"source_offset": {"page_index": 2}}},
+      {"element_id": "elm_fin_010", "kind": "text", "text": "Operating mar-\ngin remained 18.2% for ticker ACME.", "page_number": 3, "metadata": {"section_hint": "Results", "source_offset": {"page_index": 2, "block_index": 1}}},
+      {"element_id": "elm_fin_011", "kind": "text", "text": "CONFIDENTIAL — forward-looking statement disclaimer.", "page_number": 3, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 2, "block_index": 2}}},
+      {"element_id": "elm_fin_012", "kind": "footer", "text": "Page 3 of 3", "page_number": 3, "metadata": {"source_offset": {"page_index": 2}}}
+    ],
+    "expected": {
+      "elements_out": 4,
+      "duplicates_removed": 2,
+      "header_footer_removed": 6,
+      "page_numbers_removed": 3,
+      "tables_preserved": 1,
+      "retained_contains": ["Revenue was $1,234.50 (12.5%).", "Operating margin remained 18.2% for ticker ACME."],
+      "table_text": "Metric\tValue\nRevenue\t$1,234.50\nMargin\t12.5%"
+    }
+  },
+  {
+    "name": "legal_noisy",
+    "domain": "legal",
+    "source_type": "docx",
+    "elements": [
+      {"element_id": "elm_leg_001", "kind": "header", "text": "MASTER SERVICES AGREEMENT — 1", "page_number": 1, "metadata": {"source_offset": {"page_index": 0}}},
+      {"element_id": "elm_leg_002", "kind": "text", "text": "2.1   Fees. Customer shall pay $25,000.00 within 30 days.", "page_number": 1, "metadata": {"section_hint": "2. Fees", "source_offset": {"page_index": 0, "block_index": 1}}},
+      {"element_id": "elm_leg_003", "kind": "text", "text": "CONFIDENTIAL — proprietary legal notice.", "page_number": 1, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 0, "block_index": 2}}},
+      {"element_id": "elm_leg_004", "kind": "footer", "text": "1", "page_number": 1, "metadata": {"source_offset": {"page_index": 0}}},
+      {"element_id": "elm_leg_005", "kind": "header", "text": "MASTER SERVICES AGREEMENT — 2", "page_number": 2, "metadata": {"source_offset": {"page_index": 1}}},
+      {"element_id": "elm_leg_006", "kind": "text", "text": "The parties agree that Section 7.4 survives termination.", "page_number": 2, "metadata": {"section_hint": "7. General", "source_offset": {"page_index": 1, "block_index": 1}}},
+      {"element_id": "elm_leg_007", "kind": "text", "text": "CONFIDENTIAL — proprietary legal notice.", "page_number": 2, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 1, "block_index": 2}}},
+      {"element_id": "elm_leg_008", "kind": "footer", "text": "2", "page_number": 2, "metadata": {"source_offset": {"page_index": 1}}},
+      {"element_id": "elm_leg_009", "kind": "header", "text": "MASTER SERVICES AGREEMENT — 3", "page_number": 3, "metadata": {"source_offset": {"page_index": 2}}},
+      {"element_id": "elm_leg_010", "kind": "text", "text": "The parties agree that Section 7.4 survives termination.", "page_number": 3, "metadata": {"section_hint": "7. General", "source_offset": {"page_index": 2, "block_index": 1}}},
+      {"element_id": "elm_leg_011", "kind": "text", "text": "7.4 Notices. Email notice is effective upon receipt.", "page_number": 3, "metadata": {"section_hint": "7. General", "source_offset": {"page_index": 2, "block_index": 2}}},
+      {"element_id": "elm_leg_012", "kind": "text", "text": "CONFIDENTIAL — proprietary legal notice.", "page_number": 3, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 2, "block_index": 3}}},
+      {"element_id": "elm_leg_013", "kind": "footer", "text": "3", "page_number": 3, "metadata": {"source_offset": {"page_index": 2}}}
+    ],
+    "expected": {
+      "elements_out": 5,
+      "duplicates_removed": 2,
+      "header_footer_removed": 6,
+      "page_numbers_removed": 3,
+      "tables_preserved": 0,
+      "retained_contains": ["2.1 Fees. Customer shall pay $25,000.00 within 30 days.", "Section 7.4 survives termination.", "7.4 Notices. Email notice is effective upon receipt."],
+      "legitimate_repeat_count": 2
+    }
+  },
+  {
+    "name": "research_noisy",
+    "domain": "research",
+    "source_type": "html",
+    "elements": [
+      {"element_id": "elm_res_001", "kind": "header", "text": "RAG Evaluation Study | 1", "page_number": 1, "metadata": {"source_offset": {"page_index": 0}}},
+      {"element_id": "elm_res_002", "kind": "text", "text": "3.1   Results. Eq. (3) improves recall by 4.2%; see [12].", "page_number": 1, "metadata": {"section_hint": "3.1 Results", "source_offset": {"page_index": 0, "block_index": 1}}},
+      {"element_id": "elm_res_003", "kind": "text", "text": "Not for distribution — preprint disclaimer.", "page_number": 1, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 0, "block_index": 2}}},
+      {"element_id": "elm_res_004", "kind": "footer", "text": "Page 1 of 3", "page_number": 1, "metadata": {"source_offset": {"page_index": 0}}},
+      {"element_id": "elm_res_005", "kind": "header", "text": "RAG Evaluation Study | 2", "page_number": 2, "metadata": {"source_offset": {"page_index": 1}}},
+      {"element_id": "elm_res_006", "kind": "text", "text": "Hybrid retriev-\nal combines lexical and dense signals.", "page_number": 2, "metadata": {"section_hint": "3.1 Results", "source_offset": {"page_index": 1, "block_index": 1}}},
+      {"element_id": "elm_res_007", "kind": "text", "text": "Not for distribution — preprint disclaimer.", "page_number": 2, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 1, "block_index": 2}}},
+      {"element_id": "elm_res_008", "kind": "footer", "text": "Page 2 of 3", "page_number": 2, "metadata": {"source_offset": {"page_index": 1}}},
+      {"element_id": "elm_res_009", "kind": "header", "text": "RAG Evaluation Study | 3", "page_number": 3, "metadata": {"source_offset": {"page_index": 2}}},
+      {"element_id": "elm_res_010", "kind": "text", "text": "Section 4 reports n=200 and cites Smith et al. (2024).", "page_number": 3, "metadata": {"section_hint": "4 Discussion", "source_offset": {"page_index": 2, "block_index": 1}}},
+      {"element_id": "elm_res_011", "kind": "text", "text": "Not for distribution — preprint disclaimer.", "page_number": 3, "metadata": {"boilerplate_candidate": true, "source_offset": {"page_index": 2, "block_index": 2}}},
+      {"element_id": "elm_res_012", "kind": "footer", "text": "Page 3 of 3", "page_number": 3, "metadata": {"source_offset": {"page_index": 2}}}
+    ],
+    "expected": {
+      "elements_out": 4,
+      "duplicates_removed": 2,
+      "header_footer_removed": 6,
+      "page_numbers_removed": 3,
+      "tables_preserved": 0,
+      "retained_contains": ["3.1 Results. Eq. (3) improves recall by 4.2%; see [12].", "Hybrid retrieval combines lexical and dense signals.", "Section 4 reports n=200 and cites Smith et al. (2024)."]
+    }
+  }
+]

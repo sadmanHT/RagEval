@@ -5,14 +5,21 @@ to make retrieval and generation quality measurable, reproducible, and debuggabl
 
 ## Current status
 
-Phases 1–3 are merged and verified on `main`. The current implementation covers repository/quality
-foundations, deterministic corpus governance, and normalized document loading for PDF, DOCX, and
-HTML. The ingestion boundary preserves page/source provenance, section hints, table identity,
-explicit OCR provenance for scanned PDFs, deterministic parser fingerprints/element IDs, batch
-partial-failure evidence, and debug JSON parsing without indexing.
+Phases 1–3 are merged and verified on `main`. Phase 4 cleaning/normalization is implemented on
+`phase-04-cleaning-normalization` and has passed its implementation acceptance run; final PR-head,
+merge, and post-merge `main` validation remain required before repository closure.
 
-Phase 3 includes a dedicated CI job that installs Tesseract and OCRs the real image-only PDF fixture,
-in addition to deterministic adapter tests and the cumulative unit/integration regression suite.
+The current pipeline covers repository/quality foundations, deterministic corpus governance,
+normalized PDF/DOCX/HTML loading, OCR fallback, and a provenance-preserving cleaning boundary.
+Cleaning normalizes Unicode/control/whitespace/hyphenation artifacts, suppresses evidenced repeated
+headers/footers/page numbers, conservatively deduplicates evidenced boilerplate, preserves table
+row/cell relationships and structured metadata, and emits deterministic cleaned IDs linked to their
+source elements.
+
+Phase 4 CI keeps preservation and reduction evidence separate. The inherited compact corpus
+fixtures remain unchanged when no cleaning is justified, while purpose-built noisy financial,
+legal, and research goldens must shrink without losing tested answer-bearing content, legal clause
+references, research citations, numeric formatting, table coordinates, or source provenance.
 
 ## Quick start
 
@@ -48,6 +55,12 @@ python -m rageval.ingestion.cli corpus ./data/corpus-manifest.json \
   --root ./data/raw --output-dir ./tmp/elements --split development
 ```
 
+Reproduce the deterministic Phase 4 fixture statistics used by CI:
+
+```bash
+python scripts/cleaning_fixture_report.py
+```
+
 The corpus layout is `<root>/<development|evaluation>/<financial|legal|research>/<file>`.
 Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
 
@@ -60,6 +73,9 @@ Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
 - Parser libraries never leak raw objects beyond the ingestion boundary.
 - OCR fallback is explicit, configurable, observable, and separately validated with a real local
   Tesseract path.
+- Cleaning is configuration-fingerprinted, auditable, and conservative about deleting repeated
+  answer-bearing body content.
 - Every phase must pass its own tests and the cumulative regression suite before completion.
 
-See `docs/implementation-state.md`, `docs/architecture-decisions.md`, and `docs/plans/`.
+See `docs/implementation-state.md`, `docs/architecture-decisions.md`, `docs/phases/`, and
+`docs/plans/`.

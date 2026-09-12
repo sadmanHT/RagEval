@@ -10,6 +10,7 @@ import pytest
         "rageval.core",
         "rageval.models",
         "rageval.ingestion",
+        "rageval.cleaning",
         "rageval.retrieval",
         "rageval.generation",
         "rageval.evaluation",
