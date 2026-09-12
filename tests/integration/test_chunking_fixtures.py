@@ -88,9 +88,7 @@ async def test_domain_fixtures_chunk_with_full_provenance(
 @pytest.mark.asyncio
 async def test_financial_table_fixture_is_table_aware() -> None:
     cleaned = _clean_fixture("financial_table.pdf")
-    source_tables = [
-        element for element in cleaned.elements if element.kind is ElementType.TABLE
-    ]
+    source_tables = [element for element in cleaned.elements if element.kind is ElementType.TABLE]
     assert source_tables
 
     result = await ChunkingEngine().chunk(
