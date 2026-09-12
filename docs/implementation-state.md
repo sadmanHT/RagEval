@@ -30,13 +30,25 @@ Implementation validation passed Ruff, Ruff formatting, strict mypy (22 source f
 tests, 4 integration tests, package smoke, and the complete 38-test regression suite. Detailed
 evidence is in `docs/phases/phase-02-report.md`.
 
-## Next phase
+## In progress
 
 ### Phase 3 — Document loading, parsing, and OCR
 
-Phase 3 should consume the Phase 2 manifest/source contracts and implement normalized PDF, DOCX,
-and HTML extraction with provenance preservation and explicit OCR fallback. The committed
-image-only legal PDF must be used to prove the OCR branch is genuinely exercised.
+Branch: `phase-03-document-parsing-ocr`.
+
+Scope under validation:
+- normalized PDF/DOCX/HTML extraction through project-owned `DocumentElement` contracts;
+- page/source coordinates, section hints, headers/footers, lists, captions, and table identity;
+- versioned parser configuration plus deterministic parser fingerprints and element IDs;
+- explicit OCR fallback behind an injectable adapter, with a local Tesseract implementation;
+- single-file and corpus-subset debug JSON CLI without indexing;
+- corrupt/unsupported input handling and per-file batch failure collection;
+- golden mixed-format fixture tests, dedicated Tesseract CI, and full Phase 1–2 regression checks.
+
+Phase 3 is not complete until the branch and post-merge `main` workflows pass quality, unit,
+integration, local OCR, smoke, and cumulative regression gates.
+
+## Later phases
 
 Cleaning, chunking, retrieval, reranking, generation, full evaluation, serving, observability,
 deployment hardening, and final release validation remain intentionally deferred to their
