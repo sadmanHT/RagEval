@@ -8,11 +8,11 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any, Protocol
 
-import pymupdf  # type: ignore[import-untyped]
-from bs4 import BeautifulSoup, Tag  # type: ignore[import-untyped]
-from docx import Document as OpenDocument  # type: ignore[import-untyped]
-from docx.table import Table  # type: ignore[import-untyped]
-from docx.text.paragraph import Paragraph  # type: ignore[import-untyped]
+import pymupdf
+from bs4 import BeautifulSoup, Tag
+from docx import Document as OpenDocument
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 
 from rageval.core.errors import DocumentParseError, OCRUnavailableError, UnsupportedSourceError
 from rageval.core.ids import fingerprint_mapping, make_element_id
@@ -50,10 +50,10 @@ class TesseractOCRAdapter:
     def extract_page_text(self, path: Path, page_number: int, *, dpi: int) -> str:
         try:
             import pytesseract  # type: ignore[import-untyped]
-            from PIL import Image  # type: ignore[import-untyped]
+            from PIL import Image
 
-            with pymupdf.open(path) as document:
-                page = document.load_page(page_number - 1)
+            with pymupdf.open(path) as document:  # type: ignore[no-untyped-call]
+                page = document.load_page(page_number - 1)  # type: ignore[no-untyped-call]
                 pixmap = page.get_pixmap(dpi=dpi, alpha=False)
                 image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
                 return str(pytesseract.image_to_string(image)).strip()
@@ -162,6 +162,15 @@ def _table_html(rows: Sequence[Sequence[object | None]]) -> str:
     return "".join(body)
 
 
+def _tag_classes(tag: Tag) -> tuple[str, ...]:
+    raw = tag.get("class")
+    if raw is None:
+        return ()
+    if isinstance(raw, str):
+        return (raw.lower(),)
+    return tuple(str(value).lower() for value in raw)
+
+
 def _pdf_text_items(
     page: Any,
     *,
@@ -179,7 +188,12 @@ def _pdf_text_items(
         bbox_raw = block.get("bbox")
         if not isinstance(bbox_raw, (list, tuple)) or len(bbox_raw) != 4:
             raise DocumentParseError(f"unexpected PDF text block shape on page {page_index + 1}")
-        bbox = tuple(float(value) for value in bbox_raw)
+        bbox = (
+            float(bbox_raw[0]),
+            float(bbox_raw[1]),
+            float(bbox_raw[2]),
+            float(bbox_raw[3]),
+        )
         if _bbox_intersects(bbox, table_boxes):
             continue
         line_texts: list[str] = []
@@ -247,7 +261,13 @@ def _pdf_table_items(
     try:
         found = page.find_tables()
         for table_index, table in enumerate(found.tables):
-            bbox = tuple(float(value) for value in table.bbox)
+            raw_bbox = table.bbox
+            bbox = (
+                float(raw_bbox[0]),
+                float(raw_bbox[1]),
+                float(raw_bbox[2]),
+                float(raw_bbox[3]),
+            )
             table_boxes.append(bbox)
             rows = table.extract()
             text = _table_text(rows)
@@ -291,7 +311,7 @@ def _parse_pdf(
     section_hint: str | None = None
 
     try:
-        pdf = pymupdf.open(path)
+        pdf = pymupdf.open(path)  # type: ignore[no-untyped-call]
     except Exception as exc:
         raise DocumentParseError(f"cannot open PDF {path}: {exc}") from exc
 
@@ -301,7 +321,7 @@ def _parse_pdf(
             raise DocumentParseError(f"encrypted PDF requires a password: {path}")
         for page_index in range(page_count):
             page_number = page_index + 1
-            page = pdf.load_page(page_index)
+            page = pdf.load_page(page_index)  # type: ignore[no-untyped-call]
             native_text = str(page.get_text("text", sort=True)).strip()
             table_items, table_boxes = _pdf_table_items(
                 page,
@@ -375,7 +395,7 @@ def _parse_pdf(
     except Exception as exc:
         raise DocumentParseError(f"failed while parsing PDF {path}: {exc}") from exc
     finally:
-        pdf.close()
+        pdf.close()  # type: ignore[no-untyped-call]
 
     elements = tuple(
         _element(
@@ -419,7 +439,7 @@ def _iter_docx_blocks(document: Any) -> Iterable[Paragraph | Table]:
 
 
 def _docx_has_page_break(paragraph: Paragraph) -> bool:
-    xml = str(paragraph._p.xml)  # type: ignore[attr-defined]
+    xml = str(paragraph._p.xml)
     return 'w:type="page"' in xml or "lastRenderedPageBreak" in xml
 
 
@@ -433,7 +453,7 @@ def _parse_docx(path: Path, document: DocumentRecord, *, config: ParserConfig) -
     table_index = 0
 
     try:
-        doc = OpenDocument(path)
+        doc = OpenDocument(str(path))
         for block in _iter_docx_blocks(doc):
             if isinstance(block, Paragraph):
                 text = block.text.strip()
@@ -549,7 +569,7 @@ def _parse_docx(path: Path, document: DocumentRecord, *, config: ParserConfig) -
 
 def _is_page_break(tag: Tag) -> bool:
     style = str(tag.get("style", "")).replace(" ", "").lower()
-    classes = " ".join(str(value).lower() for value in tag.get("class", []))
+    classes = " ".join(_tag_classes(tag))
     return (tag.name == "hr" and "page-break" in classes) or (
         "page-break-before:always" in style or "page-break-after:always" in style
     )
@@ -609,7 +629,7 @@ def _parse_html(path: Path, document: DocumentRecord, *, config: ParserConfig) -
         elif node.name == "footer":
             kind = ElementType.FOOTER
         else:
-            classes = {str(value).lower() for value in node.get("class", [])}
+            classes = set(_tag_classes(node))
             kind = (
                 ElementType.CAPTION
                 if "caption" in classes or re.match(r"^(figure|table)\s+\d+", text, re.I)
