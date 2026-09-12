@@ -167,9 +167,7 @@ async def _run() -> dict[str, object]:
                 "forced_rerank_chunk_id": forced.chunk_id,
                 "forced_pre_rerank_rank": final.final_context[0].metadata["pre_rerank_rank"],
                 "forced_post_rerank_rank": final.final_context[0].metadata["post_rerank_rank"],
-                "final_chunk_ids": [
-                    item.retrieval.chunk.chunk_id for item in final.final_context
-                ],
+                "final_chunk_ids": [item.retrieval.chunk.chunk_id for item in final.final_context],
             },
             "multi_hop": {
                 "triggered": multi_response.multi_hop.triggered,
