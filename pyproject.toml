@@ -11,8 +11,13 @@ requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "RAG-Eval contributors" }]
 dependencies = [
+    "beautifulsoup4>=4.12,<5",
+    "pillow>=10,<12",
     "pydantic>=2.9,<3",
     "pydantic-settings>=2.6,<3",
+    "pymupdf>=1.24,<2",
+    "pytesseract>=0.3.13,<1",
+    "python-docx>=1.1,<2",
 ]
 
 [project.optional-dependencies]
@@ -33,6 +38,7 @@ testpaths = ["tests"]
 markers = [
     "integration: tests that require local infrastructure",
     "live_provider: tests that require external provider credentials",
+    "local_ocr: tests that require the local Tesseract binary",
     "benchmark: non-CI benchmark tests",
 ]
 asyncio_mode = "auto"
