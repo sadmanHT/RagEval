@@ -59,7 +59,5 @@ def sentence_segments(
     if domain is Domain.LEGAL and preserve_legal_clause and starts_legal_clause(stripped):
         return (stripped,)
     return tuple(
-        segment.strip()
-        for segment in _SENTENCE_BOUNDARY_RE.split(stripped)
-        if segment.strip()
+        segment.strip() for segment in _SENTENCE_BOUNDARY_RE.split(stripped) if segment.strip()
     )
