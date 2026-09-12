@@ -224,9 +224,7 @@ async def test_query_expansion_is_observable_bounded_and_preserves_original_quer
             self.query = query
             active = filters or SparseSearchFilter()
             results = (
-                (_result("chk_revenue", 1, 5.0, "sparse"),)
-                if "revenue" in query.casefold()
-                else ()
+                (_result("chk_revenue", 1, 5.0, "sparse"),) if "revenue" in query.casefold() else ()
             )
             return _sparse_response(query, results, active)
 
