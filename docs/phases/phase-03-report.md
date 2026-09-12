@@ -2,15 +2,17 @@
 
 ## Status
 
-Implementation acceptance completed on branch `phase-03-document-parsing-ocr` for PR #3.
+Phase 3 is fully completed, merged, and revalidated on `main`.
 
 Validated implementation head: `536d7c6ff272d3b4c7e12557775e31a8780d70a9`.
-GitHub Actions acceptance run: `34704320300`.
+Branch implementation acceptance run: `34704320300`.
+Final evidence/documentation head: `1be6088e3326d08e5665b4f328c5a6f7e5970388`.
+PR #3 merge commit: `c898bdd8b91170cf3b371b15620f7203d79ef208`.
+Post-merge `main` validation run: `34704484873`.
 Runtime used by CI: Python 3.11.
 
-This report records branch-level acceptance evidence. The phase is fully closed only after the
-final evidence/documentation head passes the same gates, PR #3 is merged, and the merge commit is
-revalidated on `main`.
+The accepted branch head, final evidence head, and merged `main` state all passed the required
+quality, integration/regression, and installed-Tesseract OCR gates.
 
 ## Implemented scope
 
@@ -54,7 +56,7 @@ revalidated on `main`.
 
 ## Validation evidence
 
-Acceptance run `34704320300` completed all three CI jobs successfully:
+Branch acceptance run `34704320300` completed all three CI jobs successfully:
 
 - `ruff check .`: passed.
 - `ruff format --check .`: passed; 59 files already formatted.
@@ -72,6 +74,11 @@ Acceptance run `34704320300` completed all three CI jobs successfully:
 
 The skip in the ordinary integration/full suite is therefore not unvalidated behavior: the exact
 same test is executed and passes in the dedicated job where its required binary is installed.
+
+The final documentation/evidence head passed the same three CI jobs in run `34704449061`. After
+PR #3 merged, the merge commit `c898bdd8b91170cf3b371b15620f7203d79ef208` was independently
+validated on `main` in run `34704484873`; quality, integration, and local-OCR all completed
+successfully.
 
 ## Defects found and fixed during acceptance
 

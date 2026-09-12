@@ -18,8 +18,9 @@ and the mixed-format fixture corpus used by later phases. Detailed evidence is i
 
 ### Phase 3 — Document loading, parsing, and OCR
 
-Branch-level implementation acceptance completed on `phase-03-document-parsing-ocr` at head
-`536d7c6ff272d3b4c7e12557775e31a8780d70a9` in GitHub Actions run `34704320300`.
+Merged to `main` as PR #3 at commit `c898bdd8b91170cf3b371b15620f7203d79ef208` and revalidated
+post-merge in GitHub Actions run `34704484873`. Quality, service-backed integration/regression, and
+the dedicated installed-Tesseract OCR job all completed successfully on the merge commit.
 
 Implemented scope:
 - normalized PDF/DOCX/HTML extraction through project-owned `DocumentElement` contracts;
@@ -32,16 +33,13 @@ Implemented scope:
 - golden mixed-format fixture tests, a dedicated installed-Tesseract CI job, and cumulative
   Phase 1–2 regression verification.
 
-Accepted implementation evidence: Ruff and Ruff formatting passed; strict mypy passed on 25 source
-files; 42 unit tests passed; regular integration passed 9 tests with the local-OCR-only test
-intentionally skipped there; full cumulative regression passed 51 tests with that same one skip;
-the dedicated Tesseract job installed the OCR binary and passed the skipped OCR test independently;
-Qdrant/Redis readiness, package smoke, and clean Compose teardown all passed. Detailed evidence is
-in `docs/phases/phase-03-report.md`.
-
-Phase 3 is considered implementation-complete on the branch but is not repository-closed until PR
-#3 is merged and the merge commit passes the same quality, integration, local-OCR, smoke, and
-cumulative regression gates on `main`.
+Branch acceptance evidence: Ruff and Ruff formatting passed; strict mypy passed on 25 source files;
+42 unit tests passed; regular integration passed 9 tests with the local-OCR-only test intentionally
+skipped there; full cumulative regression passed 51 tests with that same one skip; the dedicated
+Tesseract job installed the OCR binary and passed the OCR test independently; Qdrant/Redis
+readiness, package smoke, and clean Compose teardown all passed. The final evidence head repeated
+the three CI gates successfully before merge, and the merge commit repeated them successfully on
+`main`. Detailed evidence is in `docs/phases/phase-03-report.md`.
 
 ## Next phase
 
