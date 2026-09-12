@@ -106,9 +106,7 @@ async def test_real_pipeline_reranks_top5_and_multihop_recovers_non_adjacent_chu
         forced = all_chunks[-1]
         service = RetrievalService(
             hybrid=hybrid,
-            reranker=RerankingEngine(
-                provider=DeterministicFakeReranker({forced.text: 100.0})
-            ),
+            reranker=RerankingEngine(provider=DeterministicFakeReranker({forced.text: 100.0})),
             config=RetrievalServiceConfig(final_top_n=5),
         )
         response = await service.search(all_chunks[0].text)
