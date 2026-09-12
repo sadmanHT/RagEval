@@ -117,5 +117,7 @@ class OpenAIEmbeddingProvider:
         ordered.sort(key=lambda pair: pair[0])
         expected_indexes = list(range(len(texts)))
         if [index for index, _ in ordered] != expected_indexes:
-            raise ProviderError("OpenAI embedding response indexes are not a complete input ordering")
+            raise ProviderError(
+                "OpenAI embedding response indexes are not a complete input ordering"
+            )
         return [vector for _, vector in ordered]
