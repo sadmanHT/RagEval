@@ -12,7 +12,11 @@ from rageval.cleaning import clean_parsed_document
 from rageval.corpus.manifest import scan_corpus
 from rageval.ingestion.loaders import parse_corpus_document
 from rageval.ingestion.models import OCRMode, ParserConfig
-from rageval.retrieval.dense import DenseIndexConfig, LocalHashDenseEmbeddingProvider, QdrantDenseIndex
+from rageval.retrieval.dense import (
+    DenseIndexConfig,
+    LocalHashDenseEmbeddingProvider,
+    QdrantDenseIndex,
+)
 from rageval.retrieval.hybrid import (
     DictionaryQueryExpansionProvider,
     HybridRetrievalConfig,
@@ -184,7 +188,10 @@ async def build_report() -> dict[str, object]:
                 "semantic_query_proxy": {
                     "query": semantic_query,
                     "top_chunk_id": semantic_proxy.results[0].chunk.chunk_id,
-                    "note": "natural-language dense-path mechanics only; local hash is not learned semantic evidence",
+                    "note": (
+                        "natural-language dense-path mechanics only; "
+                        "local hash is not learned semantic evidence"
+                    ),
                 },
                 "vocabulary_mismatch": {
                     "query": mismatch.query,
