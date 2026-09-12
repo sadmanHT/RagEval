@@ -205,9 +205,9 @@ class QdrantDenseIndex:
         texts = [chunk.text for chunk in chunks]
         vectors: list[list[float]] = []
         try:
-            for batch in _batched(texts, self.config.embed_batch_size):
-                embedded = await self.provider.embed(batch)
-                if len(embedded) != len(batch):
+            for text_batch in _batched(texts, self.config.embed_batch_size):
+                embedded = await self.provider.embed(text_batch)
+                if len(embedded) != len(text_batch):
                     raise ProviderError("embedding provider returned the wrong number of vectors")
                 for vector in embedded:
                     if len(vector) != self.config.vector_size:
@@ -236,10 +236,10 @@ class QdrantDenseIndex:
             for chunk, vector in zip(chunks, vectors, strict=True)
         ]
         try:
-            for batch in _batched(points, self.config.upsert_batch_size):
+            for point_batch in _batched(points, self.config.upsert_batch_size):
                 await self.client.upsert(
                     collection_name=self.config.collection_name,
-                    points=batch,
+                    points=list(point_batch),
                     wait=True,
                 )
         except Exception as exc:
@@ -298,12 +298,14 @@ class QdrantDenseIndex:
                 records.extend(page)
                 if offset is None:
                     break
-            chunk_ids = [
-                record.payload.get("chunk_id")
-                for record in records
-                if isinstance(record.payload, dict)
-                and isinstance(record.payload.get("chunk_id"), str)
-            ]
+            chunk_ids: list[str] = []
+            for record in records:
+                payload = record.payload
+                if not isinstance(payload, dict):
+                    continue
+                chunk_id = payload.get("chunk_id")
+                if isinstance(chunk_id, str):
+                    chunk_ids.append(chunk_id)
             return tuple(sorted(chunk_ids))
         except Exception as exc:
             raise IndexingError(f"Qdrant consistency read failed: {exc}") from exc
