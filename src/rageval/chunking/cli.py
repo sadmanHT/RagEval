@@ -7,14 +7,6 @@ import asyncio
 import json
 from pathlib import Path
 
-from rageval.cleaning import clean_parsed_document
-from rageval.core.errors import RagEvalError
-from rageval.core.ids import make_document_id
-from rageval.corpus.manifest import sha256_file
-from rageval.ingestion.loaders import parse_document
-from rageval.ingestion.models import OCRMode, ParserConfig
-from rageval.models import DocumentRecord, Domain, SourceType
-
 from rageval.chunking.engine import ChunkingEngine
 from rageval.chunking.models import (
     ChunkingConfig,
@@ -22,6 +14,13 @@ from rageval.chunking.models import (
     reference_chunking_config,
 )
 from rageval.chunking.providers import LocalHashEmbeddingProvider
+from rageval.cleaning import clean_parsed_document
+from rageval.core.errors import RagEvalError
+from rageval.core.ids import make_document_id
+from rageval.corpus.manifest import sha256_file
+from rageval.ingestion.loaders import parse_document
+from rageval.ingestion.models import OCRMode, ParserConfig
+from rageval.models import DocumentRecord, Domain, SourceType
 
 
 def _source_type(path: Path) -> SourceType:
