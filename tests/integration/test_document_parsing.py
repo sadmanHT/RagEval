@@ -7,7 +7,6 @@ from rageval.ingestion.loaders import parse_corpus_document
 from rageval.ingestion.models import OCRMode, ParserConfig
 from rageval.models import ElementType
 
-
 FIXTURE_ROOT = Path(__file__).parents[1] / "fixtures" / "corpus"
 
 
