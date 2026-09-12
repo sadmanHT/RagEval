@@ -13,6 +13,7 @@ import pytest
         "rageval.cleaning",
         "rageval.chunking",
         "rageval.retrieval",
+        "rageval.retrieval.dense",
         "rageval.generation",
         "rageval.evaluation",
         "rageval.serving",
