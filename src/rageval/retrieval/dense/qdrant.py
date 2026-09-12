@@ -6,7 +6,7 @@ import time
 import uuid
 from collections.abc import Sequence
 from datetime import date
-from typing import Any
+from typing import Any, TypeVar
 
 from qdrant_client import AsyncQdrantClient, models
 
@@ -22,6 +22,7 @@ from rageval.retrieval.dense.models import (
 from rageval.retrieval.dense.providers import DenseEmbeddingProvider
 
 _POINT_NAMESPACE = uuid.UUID("fd816fab-e063-44a8-82f1-799511840f14")
+_T = TypeVar("_T")
 
 
 def point_id_for_chunk(chunk_id: str) -> str:
@@ -41,7 +42,7 @@ def _document_filter(document_id: str) -> models.Filter:
 
 
 def _search_filter(search_filter: DenseSearchFilter) -> models.Filter | None:
-    conditions: list[models.Condition] = []
+    conditions: list[Any] = []
     if search_filter.domain is not None:
         conditions.append(
             models.FieldCondition(
@@ -76,7 +77,7 @@ def _search_filter(search_filter: DenseSearchFilter) -> models.Filter | None:
     return models.Filter(must=conditions) if conditions else None
 
 
-def _batched[T](items: Sequence[T], size: int) -> list[Sequence[T]]:
+def _batched(items: Sequence[_T], size: int) -> list[Sequence[_T]]:
     return [items[start : start + size] for start in range(0, len(items), size)]
 
 
@@ -276,7 +277,7 @@ class QdrantDenseIndex:
         *,
         source_date: date | None = None,
     ) -> IndexMutationResult:
-        """Atomically-at-the-API-boundary replace one document's indexed chunk set."""
+        """Delete stale points and then write the supplied document chunk set."""
         await self.delete_document(document.document_id)
         result = await self.upsert_document(document, chunks, source_date=source_date)
         return result.model_copy(update={"operation": "replace"})
