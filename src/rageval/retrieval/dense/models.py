@@ -24,7 +24,7 @@ class DenseIndexConfig(ContractModel):
     hnsw_ef_construct: int = Field(default=100, ge=4)
     search_hnsw_ef: int = Field(default=128, ge=1)
     exact_search: bool = False
-    timeout_seconds: float = Field(default=10.0, gt=0.0)
+    timeout_seconds: int = Field(default=10, ge=1)
 
     @property
     def collection_name(self) -> str:
