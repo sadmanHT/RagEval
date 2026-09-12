@@ -7,13 +7,7 @@ from enum import StrEnum
 
 from pydantic import Field, model_validator
 
-from rageval.models.contracts import (
-    Chunk,
-    ContractModel,
-    DocumentRecord,
-    Domain,
-    RetrievalResult,
-)
+from rageval.models import contracts as model_contracts
 
 
 DEFAULT_STOPWORDS = (
@@ -48,7 +42,7 @@ class BM25Variant(StrEnum):
     BM25_PLUS = "bm25_plus"
 
 
-class SparseTokenizerConfig(ContractModel):
+class SparseTokenizerConfig(model_contracts.ContractModel):
     """Deterministic tokenizer behavior included in sparse-index identity."""
 
     schema_version: str = "1.0"
@@ -57,7 +51,7 @@ class SparseTokenizerConfig(ContractModel):
     stopwords: tuple[str, ...] = DEFAULT_STOPWORDS
 
 
-class SparseIndexConfig(ContractModel):
+class SparseIndexConfig(model_contracts.ContractModel):
     """Behavior-complete BM25/BM25+ index configuration."""
 
     schema_version: str = "1.0"
@@ -70,10 +64,10 @@ class SparseIndexConfig(ContractModel):
     tokenizer: SparseTokenizerConfig = Field(default_factory=SparseTokenizerConfig)
 
 
-class SparseSearchFilter(ContractModel):
+class SparseSearchFilter(model_contracts.ContractModel):
     """Filters supported by the in-process lexical index."""
 
-    domain: Domain | None = None
+    domain: model_contracts.Domain | None = None
     document_id: str | None = Field(default=None, min_length=8)
     date_from: date | None = None
     date_to: date | None = None
@@ -87,26 +81,26 @@ class SparseSearchFilter(ContractModel):
         return self
 
 
-class SparseDocumentInput(ContractModel):
+class SparseDocumentInput(model_contracts.ContractModel):
     """Canonical document metadata paired with its Phase 5 chunks."""
 
-    document: DocumentRecord
-    chunks: tuple[Chunk, ...]
+    document: model_contracts.DocumentRecord
+    chunks: tuple[model_contracts.Chunk, ...]
     source_date: date | None = None
 
 
-class SparseIndexEntry(ContractModel):
+class SparseIndexEntry(model_contracts.ContractModel):
     """Persisted lexical representation for one canonical chunk."""
 
-    chunk: Chunk
-    domain: Domain
+    chunk: model_contracts.Chunk
+    domain: model_contracts.Domain
     source_date: date | None = None
     tokens: tuple[str, ...]
     term_frequencies: dict[str, int]
     document_length: int = Field(ge=0)
 
 
-class SparseIndexSnapshot(ContractModel):
+class SparseIndexSnapshot(model_contracts.ContractModel):
     """Portable deterministic sparse-index snapshot."""
 
     schema_version: str = "1.0"
@@ -119,7 +113,7 @@ class SparseIndexSnapshot(ContractModel):
     document_count: int = Field(ge=0)
 
 
-class SparseMatchDiagnostic(ContractModel):
+class SparseMatchDiagnostic(model_contracts.ContractModel):
     """Per-result lexical matching evidence for debugging and audits."""
 
     chunk_id: str = Field(min_length=8)
@@ -129,13 +123,13 @@ class SparseMatchDiagnostic(ContractModel):
     term_frequencies: dict[str, int]
 
 
-class SparseSearchResponse(ContractModel):
+class SparseSearchResponse(model_contracts.ContractModel):
     """Stable sparse-search response with query-token and term-match diagnostics."""
 
     schema_version: str = "1.0"
     query: str
     query_tokens: tuple[str, ...]
-    results: tuple[RetrievalResult, ...]
+    results: tuple[model_contracts.RetrievalResult, ...]
     diagnostics: tuple[SparseMatchDiagnostic, ...]
     index_fingerprint: str = Field(min_length=16)
     config_fingerprint: str = Field(min_length=16)
