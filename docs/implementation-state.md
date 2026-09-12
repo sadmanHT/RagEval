@@ -67,14 +67,13 @@ characters, 6 duplicate boilerplate elements, and 24 total boilerplate/page-arti
 financial structured table remained preserved. Detailed evidence is in
 `docs/phases/phase-04-report.md`.
 
-## Accepted pending merge
-
 ### Phase 5 — Chunking engine, table awareness, and ablation harness
 
-Implementation is accepted on branch `phase-05-chunking-ablation` in PR #5. The accepted
-implementation head `70ed3b255bafcd64128a9ce0b88a985bedaf50be` passed all three GitHub Actions
-jobs in run `34707147506`. The current documentation head must repeat those gates before the PR is
-made ready and merged.
+Merged to `main` as PR #5 at commit `33ded41494e3573552e9b3ee4dfa1371e8b5abaa` from final
+validated PR head `85e84ce10b8ab81b7c8a76232a7cd5352c33a6f6`. Post-merge GitHub Actions run
+`34707378361` passed quality, integration/cleaning/chunking-ablation/smoke/full regression, and the
+dedicated installed-Tesseract OCR job. The later documentation-only `main` commits also repeated
+all three gates successfully; closure evidence is recorded in `docs/phases/phase-05-postmerge.md`.
 
 Implemented scope:
 - one async `ChunkingEngine` for fixed 256/32, 512/64, 1024/128, and semantic strategies;
@@ -92,11 +91,11 @@ Implemented scope:
   table fragmentation, and provenance coverage;
 - a permanent CI chunking-ablation gate plus cumulative Phase 1–4 regression coverage.
 
-Accepted implementation evidence: Ruff and formatter passed with 79 files formatted; strict mypy
-passed on 36 source files; 66 unit tests passed; regular integration passed 20 tests with one
-intentional local-OCR-only skip; the full cumulative suite passed 86 tests with that same skip;
-Qdrant/Redis readiness, cleaning statistics, chunking ablation, package smoke, and clean Compose
-teardown passed; the dedicated OCR job installed Tesseract 5.3.4 and passed the real OCR test.
+Acceptance evidence: Ruff and formatter passed with 79 files formatted; strict mypy passed on 36
+source files; 66 unit tests passed; regular integration passed 20 tests with one intentional
+local-OCR-only skip; the full cumulative suite passed 86 tests with that same skip; Qdrant/Redis
+readiness, cleaning statistics, chunking ablation, package smoke, and clean Compose teardown passed;
+the dedicated OCR job installed Tesseract 5.3.4 and passed the real OCR test.
 
 Fixture ablation dataset fingerprint:
 `de9ac8a849c05782102c91800a4a58acd00c21564c0966ea160dac1b72643d9b`.
