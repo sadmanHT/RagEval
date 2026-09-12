@@ -26,57 +26,62 @@ Phase 5 provides fixed 256/32, 512/64, and 1024/128 plus provider-injected seman
 
 ### Phase 6 — Embeddings, Qdrant indexing, and dense retrieval
 
-Merged to `main` as PR #6 at commit `52b49d89cfe1f3e69b0f60aee4bd463cd3411bbe` from final validated PR head `d3fc76c1ab23c4aa3d73e4eadacc8c3608162ef9`. Merge-triggered GitHub Actions run `34710743377` passed all three jobs: quality, integration with real-Qdrant dense fixture evidence and full regression, and dedicated installed-Tesseract OCR. Post-merge closure head `d8d3bf508ef5be6b076bd37e18a135c18914fd64` also repeated the complete three-job suite.
+Merged to `main` as PR #6 at commit `52b49d89cfe1f3e69b0f60aee4bd463cd3411bbe` from final validated PR head `d3fc76c1ab23c4aa3d73e4eadacc8c3608162ef9`. Merge-triggered GitHub Actions run `34710743377` passed all three jobs. Post-merge closure head `d8d3bf508ef5be6b076bd37e18a135c18914fd64` repeated the complete three-job suite.
 
 Phase 6 provides provider-abstracted dense embeddings, versioned Qdrant cosine collections, deterministic point identity, reconstructable canonical chunk payloads, lifecycle/consistency operations, metadata filters, and dense top-k `RetrievalResult` reconstruction. The deterministic local-hash provider validates mechanics only; live OpenAI validation remains unrun without credentials. Detailed evidence is in `docs/phases/phase-06-report.md`.
 
 ### Phase 7 — BM25 sparse retrieval and domain tokenization
 
-Merged to `main` as PR #7 at commit `ec7235fd1584b6f6d35cec040cb061969991e766` from final validated PR head `2845b6f1d5bda03d7f15a0123d1c7a827df00546`. Final PR-head GitHub Actions run `34712500651` and independent post-merge `main` run `34712603029` both passed all three jobs: quality, integration with cleaning/chunking/dense/sparse evidence and full regression, and dedicated installed-Tesseract OCR.
+Merged to `main` as PR #7 at commit `ec7235fd1584b6f6d35cec040cb061969991e766` from final validated PR head `2845b6f1d5bda03d7f15a0123d1c7a827df00546`. Final PR-head run `34712500651` and independent post-merge run `34712603029` both passed all three jobs.
 
-Implemented scope:
-
-- common result-only `Retriever.retrieve()` protocol with a non-breaking Phase 6 dense adapter;
-- deterministic in-process BM25 and BM25+ scoring over canonical Phase 5 chunks;
-- conservative domain-aware tokenizer preserving `10-K`, `Q3`, ticker symbols, percentages, dotted legal clause numbers, `§` references, acronyms, `BM25+`, and hyphenated technical terms;
-- configurable default top-k of 20 plus versioned scoring/tokenizer configuration;
-- domain/document/source-date/chunk-config eligibility filters while keeping fixed global BM25 corpus statistics;
-- deterministic order-independent sparse index/configuration fingerprints;
-- persisted JSON sparse snapshots with fingerprint/statistics integrity validation;
-- canonical `RetrievalResult` output with original chunk IDs/configuration/provenance intact;
-- JSON diagnostics for query tokens, matched terms, matched-term frequencies, score, and rank;
-- permanent machine-readable sparse fixture evidence while retaining real-Qdrant dense, cleaning, chunking, smoke, full-regression, and OCR gates.
-
-Accepted implementation evidence: Ruff and formatter passed with 100 files formatted; strict mypy passed on 46 source files; 90 unit tests passed; ordinary integration passed 25 tests with one intentional local-OCR-only skip; full cumulative regression passed 115 tests with the same skip; and dedicated installed-Tesseract OCR passed 1 test. The sparse fixture report built six canonical chunks from four source documents, produced index fingerprint `d93b6989100b8454199f41d6f2c2fb71e9ec78407fcdcaac1e599b7c7812787b`, reproduced that identity after reversed rebuild and snapshot round-trip, and retrieved the expected rank-1 chunk for deterministic financial/legal/research exact-term queries.
-
-These sparse scores and exact-term fixtures are mechanics/provenance evidence only, not a production retrieval benchmark or evidence that BM25/BM25+ is globally better than dense retrieval. Detailed evidence and limitations are in `docs/phases/phase-07-report.md`.
+Phase 7 provides deterministic in-process BM25/BM25+ over canonical Phase 5 chunks, domain-aware lexical tokenization, default top-k 20, stable filters, deterministic sparse snapshots/fingerprints, canonical `RetrievalResult` output, and query-token/matched-term/rank/score diagnostics. Accepted implementation evidence was 90 unit tests, 25 integration tests plus one intentional local-OCR skip, 115 cumulative tests plus the same skip, and one dedicated installed-Tesseract OCR test. Detailed evidence is in `docs/phases/phase-07-report.md`.
 
 ### Phase 8 — Concurrent hybrid retrieval, Reciprocal Rank Fusion, and query expansion
 
-Merged to `main` as PR #8 at commit `b5d9b2d6d2b1f079ebe16f9a3119d35f83aa6cde` from final validated PR head `e012de44d07e26059d7ccab7d040da2313be07dc`. Final PR-head GitHub Actions run `34717434998` and independent post-merge `main` run `34717496000` both passed all three jobs: quality, integration with cleaning/chunking/dense/sparse/hybrid evidence and full regression, and dedicated installed-Tesseract OCR.
+Merged to `main` as PR #8 at commit `b5d9b2d6d2b1f079ebe16f9a3119d35f83aa6cde` from final validated PR head `e012de44d07e26059d7ccab7d040da2313be07dc`. Final PR-head run `34717434998` and independent post-merge run `34717496000` both passed all three jobs; final closure head `1da7c2bea16689bf8e0d1650d3b7f0b82fb0872e` also passed run `34717599356`.
+
+Phase 8 composes the existing dense and sparse paths concurrently, fuses canonical identities with deterministic one-based Reciprocal Rank Fusion using `1 / (k + rank)` and default `k=60`, preserves branch ranks/raw scores/contributions, applies equivalent filters, supports bounded observable query expansion, and records latency diagnostics. Accepted implementation evidence was 103 unit tests, 26 integration tests plus one intentional local-OCR skip, 129 cumulative tests plus the same skip, strict mypy on 51 source files, and one dedicated Tesseract test. The tiny local timing fixture did not demonstrate a concurrency speedup, and this negative evidence is retained. Detailed evidence is in `docs/phases/phase-08-report.md`.
+
+## Accepted implementation — pending merge closure
+
+### Phase 9 — Neural reranking, retrieval service, and multi-hop retrieval
+
+Phase 9 implementation is accepted on draft PR #9 at head `48ac34e791893dca3c119925648738cc97599a7a`. GitHub Actions run `34718531754` passed quality, real-Qdrant/BM25 integration, every inherited cleaning/chunking/dense/sparse/hybrid fixture gate, the new reranked retrieval-service evidence, package smoke, full cumulative regression, and dedicated installed-Tesseract OCR. PR merge and independent post-merge `main` validation remain required before final closure.
 
 Implemented scope:
 
-- one hybrid retriever composing the existing Phase 6 dense and Phase 7 sparse search contracts rather than duplicating their scoring/index logic;
-- concurrent dense and sparse branch execution with sibling cancellation and typed failure propagation;
-- deterministic one-based Reciprocal Rank Fusion using `1 / (k + rank)` with default `k=60` and reference branch top-k 20;
-- canonical chunk-ID deduplication, collision protection, stable tie ordering, and preservation of dense/sparse ranks, raw scores, RRF contributions, and final rank;
-- common domain/document/source-date/chunk-config filters translated consistently to both branches;
-- optional versioned/fingerprinted query expansion behind an async provider boundary;
-- deterministic dictionary expansion baseline with bounded count/length, deduplication, and guaranteed original-query retention;
-- per-branch and total latency diagnostics plus a sequential diagnostic path for measured local comparison;
-- permanent hybrid fixture evidence while retaining every previous cleaning/chunking/dense/sparse/full-regression/OCR gate.
+- async `RerankerProvider` abstraction;
+- deterministic fake reranker for credential-free acceptance;
+- Cohere Rerank hosted reference adapter with bounded timeout, retry attempts, exponential backoff, retryable 429/5xx behavior, and strict response validation;
+- reranking over the existing canonical Phase 8 `RetrievalResult` objects rather than reconstructed chunks;
+- default final top-5 context with pre-rerank rank, post-rerank rank, rerank score, provider/model identity, and deterministic rerank configuration fingerprint;
+- retrieval-service orchestration from normalized query through Phase 8 hybrid retrieval, optional multi-hop, canonical-ID merge, reranking, and final context;
+- multi-hop modes `off`, `always`, and `rule`, with `off` as the default so ordinary queries do not pay second-hop cost;
+- conservative reference-aware rule planner plus an injectable planner protocol;
+- bounded second-hop queries and merged candidate budgets;
+- per-hop diagnostics including query, effective retrieval query, expansion state, candidate IDs, hybrid fingerprint, and branch/total latency;
+- permanent real-Qdrant/BM25/RRF/rerank/multi-hop fixture evidence while retaining every previous CI gate.
 
-Accepted implementation evidence: Ruff passed and formatter reported 110 files already formatted; strict mypy passed on 51 source files; 103 unit tests passed; ordinary integration passed 26 tests with one intentional local-OCR-only skip; full cumulative regression passed 129 tests with the same skip; and dedicated Tesseract 5.3.4 validation passed 1 test. The hybrid report built 6 canonical chunks from 4 source documents with hybrid config fingerprint `37c45f72ab83fb04e27f4185e7f56456b5b6ea462adca6598093b7195a680c08`, recovered the expected lexical chunk with dense rank 1 + sparse rank 1, and demonstrated observable bounded `turnover -> revenue` expansion.
+Accepted implementation evidence:
 
-The three-sample local timing fixture did not show a concurrency speedup: concurrent median was approximately 6.382 ms and sequential median approximately 6.221 ms. This is recorded as negative timing evidence, not converted into an improvement claim. The local-hash dense provider remains mechanics-only evidence, and no hosted expansion provider or target-corpus hybrid benchmark is claimed. Detailed evidence and limitations are in `docs/phases/phase-08-report.md`.
+- Ruff passed;
+- Ruff formatter reported **123 files already formatted**;
+- strict mypy passed on **59 source files**;
+- unit suite: **114 passed**;
+- ordinary integration: **27 passed, 1 skipped** (the inherited local-OCR-only test because Tesseract is intentionally absent from that runner);
+- full cumulative suite: **141 passed, 1 skipped**;
+- dedicated installed Tesseract 5.3.4 OCR: **1 passed**.
+
+The Phase 9 fixture builds **6 canonical chunks from 4 committed source documents**. Its sparse index fingerprint is `cb40c6bc98ba218751b4b926bce19148466b97f932a2fdfbc671ff1f4a8f8c43`, service fingerprint is `1fb23ec813c4ef27b156ac654620effed71f0c6154f995f50128c8bccdfd6856`, and rerank fingerprint is `e1db77ff3b191e124eb9583de7eec473d0e6bf3e88d004fe1514d22ff09032f2`. The deterministic rerank fixture moved canonical chunk `chk_51e3471b7f313a1a164a57e03397043f` from pre-rerank rank 6 to post-rerank rank 1 while retaining its original retrieval/provenance object. The two-hop legal fixture recovered `chk_1546d99922b41acf731a9877e524839e` after first-hop top-1 omitted it and retained both hop traces.
+
+These are mechanics/provenance results, not neural-reranking or target-corpus quality results. Live Cohere validation is unrun without credentials, and no local neural cross-encoder adapter is implemented, so full offline *neural* reranking is not currently available. Detailed evidence, failure/repair history, and limitations are in `docs/phases/phase-09-report.md`.
 
 ## Next phase
 
-### Phase 9 — Reranking and multi-hop retrieval service
+### Phase 10 — Grounded generation, citations, and self-RAG
 
-Phase 9 should consume Phase 8 fused candidates by canonical `chunk_id`, add cross-encoder/hosted reranking behind explicit provider abstractions, and preserve dense/sparse/RRF/query-expansion diagnostics through the reranked result set. Multi-hop behavior must remain diagnosable and evaluation-backed rather than silently broadening retrieval.
+Phase 10 should consume the final ordered Phase 9 `RerankResult` context set while preserving all nested dense/sparse/RRF/query-expansion/rerank/hop diagnostics and canonical source provenance. Generation should assemble structured context, cite canonical chunk IDs for claims, refuse when evidence is insufficient, keep LLM providers behind explicit interfaces, and make any self-RAG/verification behavior observable and evaluation-ready.
 
 ## Later phases
 
-Grounded generation, evaluation, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
+Evaluation, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
