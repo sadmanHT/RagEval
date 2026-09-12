@@ -26,31 +26,39 @@ Phase 5 provides fixed 256/32, 512/64, and 1024/128 plus provider-injected seman
 
 ### Phase 6 — Embeddings, Qdrant indexing, and dense retrieval
 
-Merged to `main` as PR #6 at commit `52b49d89cfe1f3e69b0f60aee4bd463cd3411bbe` from final validated PR head `d3fc76c1ab23c4aa3d73e4eadacc8c3608162ef9`. Merge-triggered GitHub Actions run `34710743377` passed all three jobs: quality, integration with real-Qdrant dense fixture evidence and full regression, and dedicated installed-Tesseract OCR.
+Merged to `main` as PR #6 at commit `52b49d89cfe1f3e69b0f60aee4bd463cd3411bbe` from final validated PR head `d3fc76c1ab23c4aa3d73e4eadacc8c3608162ef9`. Merge-triggered GitHub Actions run `34710743377` passed all three jobs: quality, integration with real-Qdrant dense fixture evidence and full regression, and dedicated installed-Tesseract OCR. Post-merge closure head `d8d3bf508ef5be6b076bd37e18a135c18914fd64` also repeated the complete three-job suite.
+
+Phase 6 provides provider-abstracted dense embeddings, versioned Qdrant cosine collections, deterministic point identity, reconstructable canonical chunk payloads, lifecycle/consistency operations, metadata filters, and dense top-k `RetrievalResult` reconstruction. The deterministic local-hash provider validates mechanics only; live OpenAI validation remains unrun without credentials. Detailed evidence is in `docs/phases/phase-06-report.md`.
+
+## Accepted implementation — pending merge closure
+
+### Phase 7 — BM25 sparse retrieval and domain tokenization
+
+Phase 7 implementation is accepted on draft PR #7 at head `931c1b06aa670e62dac7695d1a99df4c225ffffa`. GitHub Actions run `34712367240` passed quality, ordinary integration with sparse and dense evidence, full regression, and dedicated installed-Tesseract OCR. PR merge and independent post-merge `main` validation remain required before final closure.
 
 Implemented scope:
-- dense embedding provider boundary with explicit provider/model/dimension metadata;
-- hosted OpenAI `text-embedding-3-large` adapter with explicit request/ordering/dimension/error validation;
-- deterministic local-hash dense provider for credential-free mechanics and integration evidence;
-- versioned Qdrant cosine collections with vector-schema validation and configurable HNSW/search parameters;
-- payload indexes for domain, document ID, source-date ordinal, and chunking-config fingerprint;
-- deterministic UUIDv5 Qdrant point IDs derived from canonical Phase 5 chunk IDs;
-- reconstructable payloads containing the full canonical `Chunk` plus document/provider/index metadata;
-- idempotent upsert, delete/reindex by document, and exact document consistency checks;
-- dense top-k search with domain/date/document/chunk-config filters and canonical `RetrievalResult` reconstruction;
-- real local-Qdrant integration for collection lifecycle, filters, stale-schema handling, service failure handling, idempotency, and parser -> cleaner -> chunker -> embedding -> Qdrant -> retrieval provenance;
-- permanent machine-readable dense fixture evidence while retaining all prior cleaning/chunking/OCR regressions.
 
-Verified evidence on the accepted implementation and merge commit includes Ruff and formatter success, strict mypy on 40 source files, 77 unit tests, 24 ordinary integration tests with one intentional local-OCR-only skip, 101 cumulative regression tests with the same skip, Qdrant/Redis startup and clean teardown, and one real installed-Tesseract OCR test. The dense fixture report indexed four source documents into six Qdrant points with financial/legal/research filter counts 3/2/1 and exact-source-text sanity queries recovering the expected canonical chunks.
+- common result-only `Retriever.retrieve()` protocol with a non-breaking Phase 6 dense adapter;
+- deterministic in-process BM25 and BM25+ scoring over canonical Phase 5 chunks;
+- conservative domain-aware tokenizer preserving `10-K`, `Q3`, ticker symbols, percentages, dotted legal clause numbers, `§` references, acronyms, `BM25+`, and hyphenated technical terms;
+- configurable default top-k of 20 plus versioned scoring/tokenizer configuration;
+- domain/document/source-date/chunk-config eligibility filters while keeping fixed global BM25 corpus statistics;
+- deterministic order-independent sparse index/configuration fingerprints;
+- persisted JSON sparse snapshots with fingerprint/statistics integrity validation;
+- canonical `RetrievalResult` output with original chunk IDs/configuration/provenance intact;
+- JSON diagnostics for query tokens, matched terms, matched-term frequencies, score, and rank;
+- permanent machine-readable sparse fixture evidence while retaining real-Qdrant dense, cleaning, chunking, smoke, full-regression, and OCR gates.
 
-Live OpenAI validation was not run because no hosted credential was available to CI. The hosted adapter is deterministically tested with an injected HTTP transport. Local-hash evidence is diagnostic mechanics evidence only, not a learned semantic retrieval benchmark. Detailed evidence and limitations are in `docs/phases/phase-06-report.md`.
+Accepted implementation evidence: Ruff and formatter passed with 100 files formatted; strict mypy passed on 46 source files; 90 unit tests passed; ordinary integration passed 25 tests with one intentional local-OCR-only skip; full cumulative regression passed 115 tests with the same skip; and dedicated installed-Tesseract OCR passed 1 test. The sparse fixture report built six canonical chunks from four source documents, produced index fingerprint `d93b6989100b8454199f41d6f2c2fb71e9ec78407fcdcaac1e599b7c7812787b`, reproduced that identity after reversed rebuild and snapshot round-trip, and retrieved the expected rank-1 chunk for deterministic financial/legal/research exact-term queries.
+
+These sparse scores and exact-term fixtures are mechanics/provenance evidence only, not a production retrieval benchmark or evidence that BM25/BM25+ is globally better than dense retrieval. Detailed evidence and limitations are in `docs/phases/phase-07-report.md`.
 
 ## Next phase
 
-### Phase 7 — BM25 sparse retrieval
+### Phase 8 — Hybrid retrieval, Reciprocal Rank Fusion, and query expansion
 
-Phase 7 should build BM25/BM25+ sparse retrieval over the same canonical Phase 5 chunk identities, emit the existing `RetrievalResult` contract, define domain-aware tokenization and deterministic index/rebuild semantics, and add sparse relevance/filter/regression evidence. Sparse result identity must remain compatible with Phase 6 dense results so Phase 8 can fuse rankings by chunk ID without score-normalizing incompatible retrievers.
+Phase 8 should combine dense and sparse rankings by canonical `chunk_id` using Reciprocal Rank Fusion with the reference smoothing constant `k=60`. Dense cosine and BM25 scores must remain independently auditable and must not be naïvely normalized or added. Any query-expansion behavior should be explicit, configuration-fingerprinted, deterministic in the baseline path, and evaluated separately from fusion.
 
 ## Later phases
 
-Fusion/query expansion, reranking/multi-hop, grounded generation, evaluation, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
+Reranking/multi-hop, grounded generation, evaluation, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
