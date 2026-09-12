@@ -9,7 +9,11 @@ from rageval.cleaning import clean_parsed_document
 from rageval.corpus.manifest import scan_corpus
 from rageval.ingestion.loaders import parse_corpus_document
 from rageval.ingestion.models import OCRMode, ParserConfig
-from rageval.retrieval.dense import DenseIndexConfig, LocalHashDenseEmbeddingProvider, QdrantDenseIndex
+from rageval.retrieval.dense import (
+    DenseIndexConfig,
+    LocalHashDenseEmbeddingProvider,
+    QdrantDenseIndex,
+)
 from rageval.retrieval.hybrid import (
     DictionaryQueryExpansionProvider,
     HybridRetrievalConfig,
