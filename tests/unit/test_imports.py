@@ -14,6 +14,7 @@ import pytest
         "rageval.chunking",
         "rageval.retrieval",
         "rageval.retrieval.dense",
+        "rageval.retrieval.sparse",
         "rageval.generation",
         "rageval.evaluation",
         "rageval.serving",

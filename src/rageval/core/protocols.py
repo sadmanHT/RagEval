@@ -18,6 +18,22 @@ class EmbeddingProvider(Protocol):
 
 
 @runtime_checkable
+class Retriever(Protocol):
+    """Common result-only retrieval boundary used by later fusion stages."""
+
+    name: str
+
+    async def retrieve(
+        self,
+        query: str,
+        *,
+        top_k: int = 20,
+    ) -> Sequence[RetrievalResult]:
+        """Return at most top_k canonical retrieval results for a query."""
+        ...
+
+
+@runtime_checkable
 class RerankerProvider(Protocol):
     name: str
 
