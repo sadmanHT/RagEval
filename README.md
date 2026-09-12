@@ -5,10 +5,15 @@ to make retrieval and generation quality measurable, reproducible, and debuggabl
 
 ## Current status
 
-Phases 1–2 are merged and verified on `main`. Phase 3 is implementing the normalized document
-loading boundary for PDF, DOCX, and HTML, including page/source provenance, table identity,
-explicit OCR fallback for scanned PDFs, deterministic parser fingerprints/element IDs, batch
-partial-failure handling, and debug JSON parsing without indexing.
+The current implementation includes Phases 1–3: repository/quality foundations, deterministic
+corpus governance, and normalized document loading for PDF, DOCX, and HTML. The ingestion boundary
+preserves page/source provenance, section hints, table identity, explicit OCR provenance for scanned
+PDFs, deterministic parser fingerprints/element IDs, batch partial-failure evidence, and debug JSON
+parsing without indexing.
+
+Phase 3 has passed its branch acceptance gates, including a dedicated CI job that installs
+Tesseract and OCRs the real image-only PDF fixture. Repository closure still requires the accepted
+PR head to merge and pass the same cumulative checks on `main`.
 
 ## Quick start
 
@@ -54,6 +59,8 @@ Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
 - Benchmark and evaluation numbers must come from actual runs, never from documentation constants.
 - Evaluation sources must remain held out by identity and checksum, including renamed duplicates.
 - Parser libraries never leak raw objects beyond the ingestion boundary.
+- OCR fallback is explicit, configurable, observable, and separately validated with a real local
+  Tesseract path.
 - Every phase must pass its own tests and the cumulative regression suite before completion.
 
 See `docs/implementation-state.md`, `docs/architecture-decisions.md`, and `docs/plans/`.
