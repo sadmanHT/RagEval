@@ -17,7 +17,10 @@ _ALL_SPACE = re.compile(r"\s+")
 _TOKEN = re.compile(r"\w+(?:[.'’/-]\w+)*|[$€£¥₹]|%", flags=re.UNICODE)
 _PAGE_OF_TOTAL = re.compile(r"\bpage\s+\d+\s+(?:of|/)\s*\d+\b", flags=re.IGNORECASE)
 _PAGE_PREFIX = re.compile(r"\bpage\s+\d+\b", flags=re.IGNORECASE)
-_BARE_PAGE = re.compile(r"^\s*(?:p(?:age)?\.?\s*)?\d+(?:\s*/\s*\d+)?\s*$", flags=re.IGNORECASE)
+_BARE_PAGE = re.compile(
+    r"^\s*(?:p(?:age)?\.?\s*)?\d+(?:\s*/\s*\d+)?\s*$",
+    flags=re.IGNORECASE,
+)
 _EDGE_PAGE_NUMBER = re.compile(r"(?:^|[|—–-]\s*)\d+\s*$")
 
 
@@ -59,6 +62,12 @@ def normalize_text(text: str, *, kind: ElementType, config: CleaningConfig) -> s
     return _ALL_SPACE.sub(" ", normalized).strip()
 
 
+def _replace_edge_page_number(match: re.Match[str]) -> str:
+    value = match.group(0)
+    prefix = value[: len(value) - len(value.lstrip("|—–- "))]
+    return f"{prefix}<page>"
+
+
 def repeated_pattern_signature(text: str, *, canonicalize_page_numbers: bool) -> str:
     """Canonicalize a header/footer so page-varying numbers can still repeat."""
     signature = _ALL_SPACE.sub(" ", unicodedata.normalize("NFKC", text)).strip().casefold()
@@ -67,14 +76,18 @@ def repeated_pattern_signature(text: str, *, canonicalize_page_numbers: bool) ->
         signature = _PAGE_PREFIX.sub("page <page>", signature)
         if _BARE_PAGE.fullmatch(signature):
             return "<page-number>"
-        signature = _EDGE_PAGE_NUMBER.sub(lambda match: match.group(0).rsplit(" ", 1)[0] + " <page>", signature)
+        signature = _EDGE_PAGE_NUMBER.sub(_replace_edge_page_number, signature)
     return signature
 
 
 def is_page_number_pattern(text: str) -> bool:
     """Return whether text is structurally a standalone page-number marker."""
     normalized = _ALL_SPACE.sub(" ", unicodedata.normalize("NFKC", text)).strip()
-    return bool(_BARE_PAGE.fullmatch(normalized) or _PAGE_PREFIX.fullmatch(normalized))
+    return bool(
+        _BARE_PAGE.fullmatch(normalized)
+        or _PAGE_PREFIX.fullmatch(normalized)
+        or _PAGE_OF_TOTAL.fullmatch(normalized)
+    )
 
 
 def comparison_tokens(text: str) -> frozenset[str]:
