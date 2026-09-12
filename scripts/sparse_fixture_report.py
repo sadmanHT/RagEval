@@ -32,11 +32,7 @@ SELECTED_FIXTURES = (
 async def build_report() -> dict[str, object]:
     manifest = scan_corpus(FIXTURE_ROOT).manifest
     selected = sorted(
-        (
-            item
-            for item in manifest.documents
-            if Path(item.relative_path).name in SELECTED_FIXTURES
-        ),
+        (item for item in manifest.documents if Path(item.relative_path).name in SELECTED_FIXTURES),
         key=lambda item: item.relative_path,
     )
     chunk_config = reference_chunking_config(ChunkStrategy.FIXED_512)
