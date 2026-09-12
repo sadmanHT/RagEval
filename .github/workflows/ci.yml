@@ -54,6 +54,8 @@ jobs:
         run: pytest -q tests/integration
       - name: Cleaning fixture stats
         run: python scripts/cleaning_fixture_report.py
+      - name: Chunking fixture ablation
+        run: python scripts/chunking_fixture_report.py
       - name: Package smoke test
         run: python -m rageval.smoke
       - name: Full regression suite
