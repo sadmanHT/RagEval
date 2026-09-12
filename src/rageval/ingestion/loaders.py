@@ -53,7 +53,7 @@ class TesseractOCRAdapter:
             from PIL import Image
 
             with pymupdf.open(path) as document:  # type: ignore[no-untyped-call]
-                page = document.load_page(page_number - 1)  # type: ignore[no-untyped-call]
+                page = document.load_page(page_number - 1)
                 pixmap = page.get_pixmap(dpi=dpi, alpha=False)
                 image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
                 return str(pytesseract.image_to_string(image)).strip()
