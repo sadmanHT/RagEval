@@ -108,12 +108,23 @@ def _repeated_header_footer_removals(
     return removals
 
 
+def _has_boilerplate_evidence(item: _PreparedElement, config: CleaningConfig) -> bool:
+    if item.source.metadata.get("boilerplate_candidate") is True:
+        return True
+    lowered = item.text.casefold()
+    return any(
+        marker.strip() and marker.casefold() in lowered for marker in config.boilerplate_markers
+    )
+
+
 def _eligible_for_boilerplate(item: _PreparedElement, config: CleaningConfig) -> bool:
     if item.source.kind not in {ElementType.TEXT, ElementType.OCR_TEXT}:
         return False
     if item.source.page_number is None:
         return False
-    return config.dedup_min_chars <= len(item.text) <= config.dedup_max_chars
+    if not config.dedup_min_chars <= len(item.text) <= config.dedup_max_chars:
+        return False
+    return _has_boilerplate_evidence(item, config)
 
 
 def _duplicate_boilerplate_removals(
@@ -257,9 +268,7 @@ def clean_parsed_document(
         page_numbers_removed=sum(
             item.reason is RemovalReason.PAGE_NUMBER for item in ordered_removals
         ),
-        ocr_elements=sum(
-            item.source.kind is ElementType.OCR_TEXT for item in prepared
-        ),
+        ocr_elements=sum(item.source.kind is ElementType.OCR_TEXT for item in prepared),
         tables_preserved=len(source_table_ids & retained_table_source_ids),
         characters_in=characters_in,
         characters_out=characters_out,
