@@ -59,7 +59,7 @@ async def _fresh_index(name: str, *, dimension: int = 32) -> QdrantDenseIndex:
             collection_version=name,
             vector_size=dimension,
             exact_search=True,
-            timeout_seconds=3.0,
+            timeout_seconds=3,
         ),
         url=QDRANT_URL,
     )
@@ -173,7 +173,7 @@ async def test_qdrant_unavailable_is_an_explicit_indexing_error() -> None:
             collection_base="rageval_unreachable",
             collection_version="v1",
             vector_size=8,
-            timeout_seconds=0.2,
+            timeout_seconds=1,
         ),
         url="http://127.0.0.1:1",
     )
