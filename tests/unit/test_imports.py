@@ -16,6 +16,8 @@ import pytest
         "rageval.retrieval.dense",
         "rageval.retrieval.sparse",
         "rageval.retrieval.hybrid",
+        "rageval.retrieval.rerank",
+        "rageval.retrieval.service",
         "rageval.generation",
         "rageval.evaluation",
         "rageval.serving",
