@@ -210,9 +210,7 @@ class _FakeHybrid:
 
 @pytest.mark.asyncio
 async def test_simple_query_does_not_trigger_rule_multihop() -> None:
-    first = _hybrid_response(
-        "What is revenue?", (_candidate("chk_00000001", 1, "Revenue grew."),)
-    )
+    first = _hybrid_response("What is revenue?", (_candidate("chk_00000001", 1, "Revenue grew."),))
     hybrid = _FakeHybrid({"What is revenue?": first})
     service = RetrievalService(
         hybrid=hybrid,
@@ -247,9 +245,7 @@ async def test_multihop_recovers_non_adjacent_referenced_chunk_and_traces_hops()
     )
     service = RetrievalService(
         hybrid=hybrid,
-        reranker=RerankingEngine(
-            provider=DeterministicFakeReranker({"termination remedy": 10.0})
-        ),
+        reranker=RerankingEngine(provider=DeterministicFakeReranker({"termination remedy": 10.0})),
         config=RetrievalServiceConfig(
             multi_hop_mode=MultiHopMode.RULE,
             max_second_hop_queries=1,
