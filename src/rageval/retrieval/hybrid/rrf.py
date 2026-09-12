@@ -30,11 +30,7 @@ class _Accumulator:
 
     @property
     def best_rank(self) -> int:
-        ranks = [
-            hit.result.rank
-            for hit in (self.dense, self.sparse)
-            if hit is not None
-        ]
+        ranks = [hit.result.rank for hit in (self.dense, self.sparse) if hit is not None]
         return min(ranks)
 
 
