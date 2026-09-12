@@ -4,15 +4,15 @@ RAG-Eval is a production-oriented Retrieval-Augmented Generation system whose pr
 
 ## Current status
 
-Phases 1–8 are merged and verified on `main`. Phase 9 reranking and multi-hop retrieval is implementation-accepted on PR #9 at head `48ac34e791893dca3c119925648738cc97599a7a`; merge and independent post-merge validation remain pending. The current pipeline covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking, reproducible dense Qdrant retrieval, deterministic BM25/BM25+ sparse retrieval, RRF hybrid fusion, and a reranked retrieval-service layer over the same canonical chunk identities.
+Phases 1–9 are merged and verified on `main`. The current pipeline covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking, reproducible dense Qdrant retrieval, deterministic BM25/BM25+ sparse retrieval, RRF hybrid fusion, and a reranked retrieval-service layer with bounded multi-hop over the same canonical chunk identities. Phase 10 — grounded generation, citations, and self-RAG — is next.
 
 Phase 6 dense retrieval consumes canonical Phase 5 chunks, embeds them behind a replaceable provider boundary, preserves stable chunk/configuration/provenance identity in reconstructable Qdrant payloads, and returns the canonical `RetrievalResult` contract. The deterministic/local acceptance path uses a local hashed embedding adapter for mechanics and real-Qdrant integration only; live OpenAI validation remains unrun without credentials.
 
-Phase 7 sparse retrieval implements BM25/BM25+ with a conservative domain-aware tokenizer. It preserves exact forms such as `10-K`, `Q3`, ticker symbols, percentages, legal clause/section references, acronyms, `BM25+`, and hyphenated technical terms. Sparse search supports domain, document, source-date, and chunking-configuration filters, deterministic index/configuration fingerprints, snapshot save/load integrity checks, and lexical diagnostics.
+Phase 7 sparse retrieval implements BM25/BM25+ with a conservative domain-aware tokenizer and stable filters, deterministic index/configuration fingerprints, snapshot integrity checks, and lexical diagnostics.
 
-Phase 8 composes dense and sparse retrieval concurrently and fuses their 1-based rankings with Reciprocal Rank Fusion using the reference default `k=60`. Dense and sparse raw scores remain independently auditable rather than being directly normalized or added. Optional query expansion is bounded, observable, provider-abstracted, and cannot remove the original query.
+Phase 8 composes dense and sparse retrieval concurrently and fuses their 1-based rankings with Reciprocal Rank Fusion using the reference default `k=60`. Dense and sparse raw scores remain independently auditable rather than being normalized or added. Optional query expansion is bounded, observable, provider-abstracted, and cannot remove the original query.
 
-Phase 9 consumes Phase 8 candidates through a provider-abstracted reranking engine and returns a default final top-5 context while preserving the nested original retrieval result, canonical IDs, provenance, pre/post rerank ranks, rerank score, provider/model identity, and configuration fingerprint. The hosted reference adapter targets Cohere Rerank with bounded timeout/retry/backoff behavior; deterministic acceptance uses a local fake reranker, and Cohere HTTP behavior is covered with mocked request/response, 429, and timeout tests. Live Cohere validation has not been run without credentials, and no local neural cross-encoder is currently implemented.
+Phase 9 consumes Phase 8 candidates through a provider-abstracted reranking engine and returns a default final top-5 context while preserving the nested original retrieval result, canonical IDs, provenance, pre/post rerank ranks, rerank score, provider/model identity, and configuration fingerprint. The hosted reference adapter targets Cohere Rerank with bounded timeout/retry/backoff behavior; deterministic acceptance uses a local fake reranker, and Cohere HTTP behavior is covered with mocked request/response, 429, and timeout tests. Live Cohere validation was not run without credentials, and no local neural cross-encoder is currently implemented.
 
 The retrieval service also supports bounded multi-hop retrieval. Multi-hop is `off` by default, can be explicitly enabled, or can use a conservative rule planner that requires relationship cues plus an explicit section/clause/appendix/schedule reference. Every executed hop records its query, retrieval query, expansion state, candidate IDs, hybrid configuration fingerprint, and branch/total latency before merged candidates are reranked.
 
@@ -77,7 +77,7 @@ python -m rageval.retrieval.sparse.cli ./tmp/sparse-index.json "Section 7.4" \
   --domain legal --top-k 20
 ```
 
-Reproduce the deterministic fixture evidence used by CI:
+Reproduce deterministic CI evidence:
 
 ```bash
 python scripts/cleaning_fixture_report.py
@@ -88,13 +88,9 @@ python scripts/hybrid_fixture_report.py
 python scripts/retrieval_service_fixture_report.py
 ```
 
-The dense fixture report parses/cleans/chunks committed source fixtures, indexes them in a real local Qdrant container, verifies consistency and filters, performs canonical retrieval sanity checks, emits machine-readable JSON, and deletes its temporary collection.
+The dense fixture report uses real local Qdrant; the sparse report validates deterministic BM25+ identity and exact-term retrieval; the hybrid report validates concurrent RRF mechanics and bounded expansion; and the retrieval-service report validates top-5 reranking plus bounded two-hop recovery. All use committed fixtures and emit machine-readable JSON.
 
-The sparse report builds the deterministic BM25+ index over the same canonical chunks, verifies order-independent rebuild and snapshot round-trip identity, performs exact-term checks with provenance intact, and emits machine-readable JSON.
-
-The hybrid report indexes the same canonical chunks into real local Qdrant and BM25, runs concurrent RRF retrieval, verifies lexical and vocabulary-mismatch paths, records branch/fusion diagnostics, and measures local concurrent versus sequential timing without asserting that concurrency must be faster.
-
-The retrieval-service report executes the same source-to-retrieval path through Phase 9. It proves deterministic reranking can move a canonical candidate from pre-rerank rank 6 to post-rerank rank 1 while returning top-5 context, and proves a bounded second hop can recover a non-adjacent legal chunk while retaining both hop traces. These are mechanics fixtures, not retrieval-quality benchmarks.
+The Phase 9 fixture proves deterministic reranking can move a canonical candidate from pre-rerank rank 6 to post-rerank rank 1 while preserving the original retrieval/provenance object. Its multi-hop fixture proves a bounded second hop can recover a non-adjacent legal chunk while retaining both hop traces. These are mechanics fixtures, not retrieval-quality benchmarks.
 
 The corpus layout is `<root>/<development|evaluation>/<financial|legal|research>/<file>`.
 Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
@@ -118,7 +114,5 @@ Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
 - Deterministic/local providers and tiny fixtures validate mechanics, not learned semantic quality or production retrieval quality.
 - No chunking or retrieval strategy is considered preferable without representative evaluation evidence.
 - Every phase must pass its own tests and the cumulative regression suite before completion.
-
-Phase 10 — grounded generation, citations, and self-RAG — is next after Phase 9 merge closure.
 
 See `docs/implementation-state.md`, `docs/architecture-decisions.md`, `docs/phases/`, and `docs/plans/`.

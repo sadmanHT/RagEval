@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementation accepted on PR #9 at head `48ac34e791893dca3c119925648738cc97599a7a` by GitHub Actions run `34718531754`. Merge and independent post-merge `main` validation are still required before Phase 9 closure.
+Complete. PR #9 merged to `main` as `0cf47f8dc7a2b3ae44c331cb287242c81284ce14` from final validated PR head `28fa30cb6ee3997b02023c6cf2f54c07b8348f69`. Final PR-head GitHub Actions run `34718753817` and independent post-merge `main` run `34718825100` both passed quality, full integration/evidence/regression, and dedicated installed-Tesseract OCR.
 
 ## Mission
 
@@ -17,7 +17,7 @@ Phase 9 composes, rather than replaces, the existing retrieval stack:
 3. Phase 8 `HybridRetriever.search()` remains the source of fused `RetrievalResult` candidates and expansion/filter diagnostics;
 4. reranking wraps the canonical `RetrievalResult` in the existing `RerankResult` contract so chunk identity and provenance are not reconstructed or discarded.
 
-## Implementation plan
+## Implementation
 
 ### Reranking
 
@@ -46,19 +46,9 @@ The committed integration fixture uses an injected deterministic planner to prov
 
 ## Verification contract
 
-Phase 9 keeps all previous gates and adds:
+Phase 9 keeps all previous gates and adds reranker contract/order tests, mocked Cohere parsing, bounded 429 retry/backoff and timeout tests, rerank-order/provenance integration coverage, simple-query non-trigger regression, non-adjacent two-hop recovery, real local Qdrant + BM25 + RRF + rerank top-5 evidence, and the machine-readable `scripts/retrieval_service_fixture_report.py` gate.
 
-- reranker contract/order tests;
-- mocked Cohere request/response parsing;
-- bounded 429 retry/backoff and timeout exhaustion tests;
-- rerank-order-change and provenance-preservation integration coverage;
-- simple-query non-trigger regression;
-- non-adjacent two-hop recovery fixture;
-- real local Qdrant + BM25 end-to-end retrieval through RRF, rerank, and top-5 final context;
-- machine-readable `scripts/retrieval_service_fixture_report.py` evidence;
-- full cumulative regression and dedicated installed-Tesseract OCR.
-
-Canonical commands remain:
+Canonical commands:
 
 ```bash
 ruff check .
@@ -80,10 +70,4 @@ pytest -q
 docker compose down -v
 ```
 
-Dedicated OCR remains a separate installed-Tesseract job.
-
-## Completion criteria
-
-Phase 9 is complete only after the exact final PR head passes all three CI jobs, PR #9 is merged, the merge commit independently passes the same three jobs on `main`, closure documentation is updated to the actual merge/run evidence, and the final documentation handoff head is green again.
-
-Live Cohere validation is an additional credential-dependent tier. Its absence must remain explicitly recorded rather than being converted into a pass.
+Dedicated OCR remains a separate installed-Tesseract job. Live Cohere validation remains an additional credential-dependent tier and was not run in Phase 9.
