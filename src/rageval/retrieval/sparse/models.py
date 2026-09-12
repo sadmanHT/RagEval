@@ -7,7 +7,13 @@ from enum import StrEnum
 
 from pydantic import Field, model_validator
 
-from rageval.models.contracts import Chunk, ContractModel, DocumentRecord, Domain, RetrievalResult
+from rageval.models.contracts import (
+    Chunk,
+    ContractModel,
+    DocumentRecord,
+    Domain,
+    RetrievalResult,
+)
 
 
 DEFAULT_STOPWORDS = (
