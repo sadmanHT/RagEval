@@ -9,27 +9,35 @@ provider protocols/fakes, safe settings/logging, deterministic IDs, typed errors
 Compose infrastructure, canonical verification commands, and GitHub Actions quality/integration
 jobs.
 
-## In progress
-
 ### Phase 2 — Corpus contracts, fixtures, data governance, and evaluation split
 
-Branch: `phase-02-corpus-contracts`.
+Implementation validated on branch `phase-02-corpus-contracts` in GitHub Actions run
+`34694976109` before final documentation/merge validation.
 
-Scope:
-- corpus manifest and split contracts;
-- PDF/DOCX/HTML discovery without parsing;
-- SHA-256 duplicate detection;
-- deterministic corpus/evaluation fingerprints;
-- development/evaluation leakage enforcement;
-- mixed-format real fixtures;
-- CLI inspection/validation;
+Implemented scope:
+- versioned corpus manifest, split, duplicate, source-locator, and evaluation-binding contracts;
+- PDF/DOCX/HTML/HTM discovery without parsing document contents;
+- streaming SHA-256 checksums and deterministic document IDs;
+- explicit duplicate evidence;
+- deterministic corpus and evaluation-dataset fingerprints;
+- hard development/evaluation leakage enforcement by checksum and document identity;
+- manifest read/write, embedded-fingerprint verification, and source revalidation;
+- corpus scan/validate/fingerprint CLI;
+- real mixed-format fixtures across financial, legal, and research domains, including an image-only OCR fixture;
 - cumulative Phase 1 regression verification.
 
-Phase 2 is not complete until its branch passes quality, fixture integration, service-backed
-integration, package smoke, and the complete cumulative pytest suite.
+Implementation validation passed Ruff, Ruff formatting, strict mypy (22 source files), 34 unit
+tests, 4 integration tests, package smoke, and the complete 38-test regression suite. Detailed
+evidence is in `docs/phases/phase-02-report.md`.
 
-## Later phases
+## Next phase
 
-Parsing/OCR, cleaning, chunking, retrieval, reranking, generation, evaluation, serving,
-observability, deployment, and release validation remain intentionally unimplemented until their
-respective phases.
+### Phase 3 — Document loading, parsing, and OCR
+
+Phase 3 should consume the Phase 2 manifest/source contracts and implement normalized PDF, DOCX,
+and HTML extraction with provenance preservation and explicit OCR fallback. The committed
+image-only legal PDF must be used to prove the OCR branch is genuinely exercised.
+
+Cleaning, chunking, retrieval, reranking, generation, full evaluation, serving, observability,
+deployment hardening, and final release validation remain intentionally deferred to their
+respective later phases.
