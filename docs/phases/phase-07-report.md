@@ -2,9 +2,14 @@
 
 ## Status
 
-Phase 7 implementation is accepted on draft PR #7 at implementation head
-`931c1b06aa670e62dac7695d1a99df4c225ffffa` by GitHub Actions run `34712367240`.
-The code-level acceptance gates are green. PR merge and post-merge `main` validation remain required before final closure.
+Phase 7 is complete, merged, and independently revalidated on `main`.
+
+Final validated PR head: `2845b6f1d5bda03d7f15a0123d1c7a827df00546`.
+Final PR-head GitHub Actions run: `34712500651` — quality, integration, and dedicated local OCR all passed.
+PR #7 merged as commit `ec7235fd1584b6f6d35cec040cb061969991e766`.
+Post-merge `main` GitHub Actions run: `34712603029` — quality, integration with cleaning/chunking/dense/sparse evidence and full regression, and dedicated installed-Tesseract OCR all passed.
+
+The earlier implementation-acceptance head `931c1b06aa670e62dac7695d1a99df4c225ffffa` remains the source of the exact detailed test-count evidence below; the final PR head and merge commit repeated the complete three-job gate without changing implementation behavior.
 
 ## Mission delivered
 
@@ -148,6 +153,14 @@ Dedicated local OCR job:
 
 - installed Tesseract 5.3.4
 - `pytest -q -m local_ocr tests/integration/test_local_ocr.py` — 1 passed in 0.61s
+
+Final PR and post-merge closure evidence:
+
+- final PR head `2845b6f1d5bda03d7f15a0123d1c7a827df00546`
+- final PR-head run `34712500651` — quality, integration, local-ocr all successful
+- merge commit `ec7235fd1584b6f6d35cec040cb061969991e766`
+- post-merge `main` run `34712603029` — quality, integration, local-ocr all successful
+- the integration job on the merge commit retained cleaning fixture stats, chunking ablation, real-Qdrant dense fixture evidence, sparse BM25 fixture evidence, package smoke, full regression, and clean teardown
 
 ## Machine-readable sparse fixture evidence
 
