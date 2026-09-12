@@ -43,8 +43,7 @@ def test_pdf_fixture_preserves_page_provenance_and_stable_ids() -> None:
         if element.kind is not ElementType.PAGE_BREAK
     )
     assert all(
-        element.metadata["parser_version"] == config.parser_version
-        for element in first.elements
+        element.metadata["parser_version"] == config.parser_version for element in first.elements
     )
 
 
