@@ -5,10 +5,10 @@ to make retrieval and generation quality measurable, reproducible, and debuggabl
 
 ## Current status
 
-Phases 1–4 are merged and verified on `main`. Phase 5 chunking is implementation-accepted in PR #5
-and is awaiting final documentation-head verification and merge. The current pipeline covers
-repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading,
-explicit OCR fallback, provenance-preserving cleaning, and interchangeable chunking strategies.
+Phases 1–5 are merged and verified on `main`. The current pipeline covers repository/quality
+foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading, explicit OCR
+fallback, provenance-preserving cleaning, and interchangeable chunking strategies. Phase 6 is the
+active implementation phase for embeddings, Qdrant indexing, and dense retrieval.
 
 Chunking supports the reference fixed configurations 256/32, 512/64, and 1024/128 together with
 provider-injected semantic sentence-boundary chunking. Table awareness keeps complete small tables
