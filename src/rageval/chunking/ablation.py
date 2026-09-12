@@ -6,11 +6,6 @@ import math
 from collections import defaultdict
 from collections.abc import Sequence
 
-from rageval.cleaning.models import CleanedDocument
-from rageval.core.ids import fingerprint_mapping
-from rageval.core.protocols import EmbeddingProvider
-from rageval.models.contracts import Chunk, Domain, ElementType
-
 from rageval.chunking.engine import ChunkingEngine, SimilarityPolicy
 from rageval.chunking.models import (
     AblationReport,
@@ -20,6 +15,10 @@ from rageval.chunking.models import (
     TokenLengthStats,
 )
 from rageval.chunking.tokenizer import Tokenizer
+from rageval.cleaning.models import CleanedDocument
+from rageval.core.ids import fingerprint_mapping
+from rageval.core.protocols import EmbeddingProvider
+from rageval.models.contracts import Chunk, Domain, ElementType
 
 
 def _percentile(values: Sequence[int], fraction: float) -> float:
