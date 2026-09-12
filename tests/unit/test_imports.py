@@ -11,6 +11,7 @@ import pytest
         "rageval.models",
         "rageval.ingestion",
         "rageval.cleaning",
+        "rageval.chunking",
         "rageval.retrieval",
         "rageval.generation",
         "rageval.evaluation",
