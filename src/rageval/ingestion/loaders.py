@@ -58,9 +58,7 @@ class TesseractOCRAdapter:
                 image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
                 return str(pytesseract.image_to_string(image)).strip()
         except (OSError, RuntimeError, ValueError) as exc:
-            raise OCRUnavailableError(
-                f"OCR failed for {path} page {page_number}: {exc}"
-            ) from exc
+            raise OCRUnavailableError(f"OCR failed for {path} page {page_number}: {exc}") from exc
         except Exception as exc:  # pragma: no cover - dependency wrapper
             module = exc.__class__.__module__
             if module.startswith("pytesseract"):
@@ -180,9 +178,7 @@ def _pdf_text_items(
             continue
         bbox_raw = block.get("bbox")
         if not isinstance(bbox_raw, (list, tuple)) or len(bbox_raw) != 4:
-            raise DocumentParseError(
-                f"unexpected PDF text block shape on page {page_index + 1}"
-            )
+            raise DocumentParseError(f"unexpected PDF text block shape on page {page_index + 1}")
         bbox = tuple(float(value) for value in bbox_raw)
         if _bbox_intersects(bbox, table_boxes):
             continue
@@ -359,8 +355,7 @@ def _parse_pdf(
 
             page_items.sort(key=lambda item: (item[0], item[1], item[3]))
             raw.extend(
-                (kind, text, page_number, metadata)
-                for _, _, kind, text, metadata in page_items
+                (kind, text, page_number, metadata) for _, _, kind, text, metadata in page_items
             )
             if config.emit_page_breaks and page_index < page_count - 1:
                 raw.append(
