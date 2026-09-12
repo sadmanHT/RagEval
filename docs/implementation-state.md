@@ -67,16 +67,58 @@ characters, 6 duplicate boilerplate elements, and 24 total boilerplate/page-arti
 financial structured table remained preserved. Detailed evidence is in
 `docs/phases/phase-04-report.md`.
 
+## Accepted pending merge
+
+### Phase 5 — Chunking engine, table awareness, and ablation harness
+
+Implementation is accepted on branch `phase-05-chunking-ablation` in PR #5. The accepted
+implementation head `70ed3b255bafcd64128a9ce0b88a985bedaf50be` passed all three GitHub Actions
+jobs in run `34707147506`. The current documentation head must repeat those gates before the PR is
+made ready and merged.
+
+Implemented scope:
+- one async `ChunkingEngine` for fixed 256/32, 512/64, 1024/128, and semantic strategies;
+- immutable versioned chunking configuration and deterministic configuration fingerprints;
+- exact fixed-window overlap plus provider-injected semantic sentence-boundary splitting;
+- deterministic local hash embeddings for offline semantic mechanics only, not learned-model
+  quality claims;
+- table-aware small-table preservation and whole-row oversized-table grouping with repeated headers;
+- source page/element/table coordinates, Phase 4 cleaning fingerprint, and direct source-element
+  provenance on every chunk;
+- practical legal-clause and configurable section-aware boundaries;
+- deterministic chunk IDs through the existing shared `Chunk` contract;
+- debug parse -> clean -> chunk CLI without indexing;
+- machine-readable per-strategy/domain ablation statistics for chunk counts, token lengths, overlap,
+  table fragmentation, and provenance coverage;
+- a permanent CI chunking-ablation gate plus cumulative Phase 1–4 regression coverage.
+
+Accepted implementation evidence: Ruff and formatter passed with 79 files formatted; strict mypy
+passed on 36 source files; 66 unit tests passed; regular integration passed 20 tests with one
+intentional local-OCR-only skip; the full cumulative suite passed 86 tests with that same skip;
+Qdrant/Redis readiness, cleaning statistics, chunking ablation, package smoke, and clean Compose
+teardown passed; the dedicated OCR job installed Tesseract 5.3.4 and passed the real OCR test.
+
+Fixture ablation dataset fingerprint:
+`de9ac8a849c05782102c91800a4a58acd00c21564c0966ea160dac1b72643d9b`.
+All four reference strategies achieved 1.0 source-element provenance coverage and zero incorrect
+table-fragmentation findings on the committed fixture corpus. The corpus is too small to rank the
+strategies: fixed 256/512/1024 and the local diagnostic semantic baseline produced identical chunk
+counts per domain and zero measured fixed overlap at fixture scale. No globally preferred strategy
+is claimed. Detailed evidence is in `docs/phases/phase-05-report.md`.
+
 ## Next phase
 
-### Phase 5 — Chunking ablation and table-aware boundaries
+### Phase 6 — Embeddings, Qdrant indexing, and dense retrieval
 
-Phase 5 must consume cleaned Phase 4 elements, preserve source-element provenance and table
-boundaries, and implement controlled fixed-token 256/512/1024 plus semantic chunking strategies.
-No preferred chunking strategy may be claimed without measured ablation evidence.
+Phase 6 must consume Phase 5 `Chunk` outputs without re-chunking, preserve each chunk's deterministic
+ID and chunking configuration fingerprint in index identity/payload metadata, implement embedding
+providers behind the existing protocol, and add reproducible Qdrant collection/index management and
+dense retrieval. It must retain source/domain/page/element/table provenance needed for filters,
+citations, evaluation attribution, and safe rebuilds. Phase 5 fixture statistics must not be used to
+silently hard-code one winning chunk configuration.
 
 ## Later phases
 
-Embeddings/dense retrieval, sparse retrieval, fusion/query expansion, reranking/multi-hop,
-grounded generation, evaluation, serving, observability/deployment hardening, and final release
-validation remain intentionally deferred to their respective later phases.
+Sparse retrieval, fusion/query expansion, reranking/multi-hop, grounded generation, evaluation,
+serving, observability/deployment hardening, and final release validation remain intentionally
+deferred to their respective later phases.

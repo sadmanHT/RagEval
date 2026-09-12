@@ -5,19 +5,21 @@ to make retrieval and generation quality measurable, reproducible, and debuggabl
 
 ## Current status
 
-Phases 1–4 are merged and verified on `main`. The current pipeline covers repository/quality
-foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading, explicit OCR
-fallback, and a provenance-preserving cleaning boundary.
+Phases 1–4 are merged and verified on `main`. Phase 5 chunking is implementation-accepted in PR #5
+and is awaiting final documentation-head verification and merge. The current pipeline covers
+repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading,
+explicit OCR fallback, provenance-preserving cleaning, and interchangeable chunking strategies.
 
-Cleaning normalizes Unicode/control/whitespace/hyphenation artifacts, suppresses evidenced repeated
-headers/footers/page numbers, conservatively deduplicates evidenced boilerplate, preserves table
-row/cell relationships and structured metadata, and emits deterministic cleaned IDs linked to their
-source elements.
+Chunking supports the reference fixed configurations 256/32, 512/64, and 1024/128 together with
+provider-injected semantic sentence-boundary chunking. Table awareness keeps complete small tables
+together and splits oversized tables only on whole-row groups with repeated headers, preserving
+source page/element/table provenance. Legal numbered clauses and section hints can also create
+conservative boundaries.
 
-Phase 4 CI keeps preservation and reduction evidence separate. The inherited compact corpus
-fixtures remain unchanged when no cleaning is justified, while purpose-built noisy financial,
-legal, and research goldens must shrink without losing tested answer-bearing content, legal clause
-references, research citations, numeric formatting, table coordinates, or source provenance.
+Phase 5 deliberately does not declare a globally optimal strategy. The committed fixtures are too
+small to distinguish the reference sizes; their role is to verify mechanics, table integrity, and
+provenance. Semantic fixture evidence uses a deterministic local hashed embedding adapter and is not
+a learned-model benchmark.
 
 ## Quick start
 
@@ -53,10 +55,26 @@ python -m rageval.ingestion.cli corpus ./data/corpus-manifest.json \
   --root ./data/raw --output-dir ./tmp/elements --split development
 ```
 
-Reproduce the deterministic Phase 4 fixture statistics used by CI:
+Parse, clean, and chunk one source without indexing:
+
+```bash
+python -m rageval.chunking.cli ./data/raw/development/financial/report.pdf \
+  --domain financial --strategy fixed_512 --output ./tmp/report.chunks.json
+```
+
+For offline semantic mechanics/debugging, use the semantic strategy; the CLI uses the deterministic
+local hashed embedding adapter rather than claiming a hosted or learned semantic-model result:
+
+```bash
+python -m rageval.chunking.cli ./data/raw/evaluation/research/paper.html \
+  --domain research --strategy semantic --output ./tmp/paper.semantic-chunks.json
+```
+
+Reproduce the deterministic fixture evidence used by CI:
 
 ```bash
 python scripts/cleaning_fixture_report.py
+python scripts/chunking_fixture_report.py
 ```
 
 The corpus layout is `<root>/<development|evaluation>/<financial|legal|research>/<file>`.
@@ -73,6 +91,10 @@ Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
   Tesseract path.
 - Cleaning is configuration-fingerprinted, auditable, and conservative about deleting repeated
   answer-bearing body content.
+- Chunking consumes cleaned elements, preserves table/source provenance, and fingerprints every
+  behavior-affecting configuration.
+- A chunking strategy is not considered preferable without representative retrieval/evaluation
+  evidence; fixture mechanics alone cannot choose a winner.
 - Every phase must pass its own tests and the cumulative regression suite before completion.
 
 See `docs/implementation-state.md`, `docs/architecture-decisions.md`, `docs/phases/`, and
