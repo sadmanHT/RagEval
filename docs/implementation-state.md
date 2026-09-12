@@ -51,11 +51,9 @@ Accepted implementation evidence: Ruff and formatter passed with 100 files forma
 
 These sparse scores and exact-term fixtures are mechanics/provenance evidence only, not a production retrieval benchmark or evidence that BM25/BM25+ is globally better than dense retrieval. Detailed evidence and limitations are in `docs/phases/phase-07-report.md`.
 
-## Accepted implementation — pending merge closure
-
 ### Phase 8 — Concurrent hybrid retrieval, Reciprocal Rank Fusion, and query expansion
 
-Phase 8 implementation is accepted on draft PR #8 at head `4b6673e0aa4f63080d99730e8f4a87c9144cdc76`. GitHub Actions run `34717256908` passed quality, real-Qdrant/BM25 integration, cleaning/chunking/dense/sparse/hybrid fixture evidence, package smoke, full cumulative regression, and dedicated installed-Tesseract OCR. PR merge and independent post-merge `main` validation remain required before final closure.
+Merged to `main` as PR #8 at commit `b5d9b2d6d2b1f079ebe16f9a3119d35f83aa6cde` from final validated PR head `e012de44d07e26059d7ccab7d040da2313be07dc`. Final PR-head GitHub Actions run `34717434998` and independent post-merge `main` run `34717496000` both passed all three jobs: quality, integration with cleaning/chunking/dense/sparse/hybrid evidence and full regression, and dedicated installed-Tesseract OCR.
 
 Implemented scope:
 
