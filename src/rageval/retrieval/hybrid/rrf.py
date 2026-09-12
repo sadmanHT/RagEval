@@ -75,7 +75,8 @@ def fuse_rrf(
                 accumulators[chunk_id] = accumulator
             elif accumulator.chunk != result.chunk:
                 raise RetrievalError(
-                    f"chunk identity collision for {chunk_id}: branches disagree on canonical payload"
+                    f"chunk identity collision for {chunk_id}: "
+                    "branches disagree on canonical payload"
                 )
             hit = _BranchHit(result=result, contribution=contribution)
             if branch == "dense":
