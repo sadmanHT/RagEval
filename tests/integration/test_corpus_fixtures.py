@@ -11,7 +11,6 @@ from rageval.corpus.manifest import (
 from rageval.corpus.models import DatasetSplit
 from rageval.models import Domain, SourceType
 
-
 FIXTURE_ROOT = Path(__file__).parents[1] / "fixtures" / "corpus"
 
 
