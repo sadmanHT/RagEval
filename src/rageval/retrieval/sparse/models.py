@@ -9,7 +9,6 @@ from pydantic import Field, model_validator
 
 from rageval.models import contracts as model_contracts
 
-
 DEFAULT_STOPWORDS = (
     "a",
     "an",
