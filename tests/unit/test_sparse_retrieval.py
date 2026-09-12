@@ -7,8 +7,9 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from rageval.core.errors import IndexingError
 from rageval.core.protocols import Retriever
-from rageval.models.contracts import Chunk, DocumentRecord, Domain, SourceType
+from rageval.models.contracts import Chunk, DocumentRecord, Domain, RetrievalResult, SourceType
 from rageval.retrieval.sparse import (
     BM25SparseIndex,
     BM25Variant,
@@ -107,7 +108,12 @@ async def test_exact_lexical_identifier_retrieves_chunk_when_fake_dense_misses()
     class FakeDenseMiss:
         name = "fake-dense-miss"
 
-        async def retrieve(self, query: str, *, top_k: int = 20) -> tuple[()]:
+        async def retrieve(
+            self,
+            query: str,
+            *,
+            top_k: int = 20,
+        ) -> tuple[RetrievalResult, ...]:
             del query, top_k
             return ()
 
@@ -233,5 +239,5 @@ def test_snapshot_load_rejects_tampered_index_fingerprint(tmp_path: Path) -> Non
     payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
     payload["index_fingerprint"] = "0" * 64
     snapshot_path.write_text(json.dumps(payload), encoding="utf-8")
-    with pytest.raises(Exception, match="index fingerprint"):
+    with pytest.raises(IndexingError, match="index fingerprint"):
         BM25SparseIndex.load(snapshot_path)
