@@ -2,9 +2,14 @@
 
 ## Status
 
-Phase 8 implementation is accepted on draft PR #8 at implementation head `4b6673e0aa4f63080d99730e8f4a87c9144cdc76` by GitHub Actions run `34717256908`. Quality, real-Qdrant/BM25 integration, cleaning/chunking/dense/sparse/hybrid fixture evidence, package smoke, full cumulative regression, and dedicated installed-Tesseract OCR are green.
+Phase 8 is complete, merged, and independently revalidated on `main`.
 
-PR merge and independent post-merge `main` validation remain required before final closure.
+Final validated PR head: `e012de44d07e26059d7ccab7d040da2313be07dc`.
+Final PR-head GitHub Actions run: `34717434998` — quality, integration/evidence/full regression, and dedicated local OCR all passed.
+PR #8 merged as commit `b5d9b2d6d2b1f079ebe16f9a3119d35f83aa6cde`.
+Post-merge `main` GitHub Actions run: `34717496000` — quality, integration with cleaning/chunking/dense/sparse/hybrid evidence and full regression, and dedicated installed-Tesseract OCR all passed.
+
+The earlier implementation-acceptance head `4b6673e0aa4f63080d99730e8f4a87c9144cdc76` remains the source of the exact detailed test-count and fixture-timing evidence below; the final PR head and merge commit repeated the complete three-job gate without changing implementation behavior.
 
 ## Mission delivered
 
@@ -225,6 +230,8 @@ Phase 8 was not accepted on the first working hybrid request:
 1. Initial PR run `34716982365` proved the real-Qdrant + BM25 hybrid integration path, hybrid fixture report, all inherited fixture evidence, and real OCR. The cumulative suite then exposed three new unit cases using synthetic chunk IDs shorter than the existing canonical `Chunk.chunk_id` contract. The test fixtures were repaired to valid IDs; the contract was not relaxed. The same run also stopped quality at Ruff on import/line formatting.
 2. Run `34717171620` passed Ruff lint and exposed canonical Ruff formatter changes in the hybrid report, RRF module, and hybrid unit tests. Ruff's exact layout was applied; no rule was suppressed.
 3. Run `34717256908` reran all three jobs from the repaired head and passed quality, real-service integration/evidence/full regression, and installed-Tesseract OCR.
+4. Final documentation head `e012de44d07e26059d7ccab7d040da2313be07dc` repeated all three jobs successfully in run `34717434998` before PR #8 left draft.
+5. PR #8 merged as `b5d9b2d6d2b1f079ebe16f9a3119d35f83aa6cde`; independent merge-triggered `main` run `34717496000` again passed all three jobs.
 
 No test, assertion, lint rule, formatter gate, strict type check, prior cleaning/chunking/dense/sparse evidence step, full regression test, or OCR validation was removed or weakened.
 
