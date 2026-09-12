@@ -30,11 +30,9 @@ Merged to `main` as PR #6 at commit `52b49d89cfe1f3e69b0f60aee4bd463cd3411bbe` f
 
 Phase 6 provides provider-abstracted dense embeddings, versioned Qdrant cosine collections, deterministic point identity, reconstructable canonical chunk payloads, lifecycle/consistency operations, metadata filters, and dense top-k `RetrievalResult` reconstruction. The deterministic local-hash provider validates mechanics only; live OpenAI validation remains unrun without credentials. Detailed evidence is in `docs/phases/phase-06-report.md`.
 
-## Accepted implementation — pending merge closure
-
 ### Phase 7 — BM25 sparse retrieval and domain tokenization
 
-Phase 7 implementation is accepted on draft PR #7 at head `931c1b06aa670e62dac7695d1a99df4c225ffffa`. GitHub Actions run `34712367240` passed quality, ordinary integration with sparse and dense evidence, full regression, and dedicated installed-Tesseract OCR. PR merge and independent post-merge `main` validation remain required before final closure.
+Merged to `main` as PR #7 at commit `ec7235fd1584b6f6d35cec040cb061969991e766` from final validated PR head `2845b6f1d5bda03d7f15a0123d1c7a827df00546`. Final PR-head GitHub Actions run `34712500651` and independent post-merge `main` run `34712603029` both passed all three jobs: quality, integration with cleaning/chunking/dense/sparse evidence and full regression, and dedicated installed-Tesseract OCR.
 
 Implemented scope:
 
