@@ -84,15 +84,19 @@ def _sparse_response(
 
 def test_rrf_arithmetic_overlap_and_one_based_ranks() -> None:
     dense = (
-        _result("chk_a", 1, 0.91, "dense"),
-        _result("chk_b", 2, 0.81, "dense"),
+        _result("chk_alpha", 1, 0.91, "dense"),
+        _result("chk_bravo", 2, 0.81, "dense"),
     )
     sparse = (
-        _result("chk_c", 1, 4.2, "sparse"),
-        _result("chk_a", 2, 3.9, "sparse"),
+        _result("chk_charlie", 1, 4.2, "sparse"),
+        _result("chk_alpha", 2, 3.9, "sparse"),
     )
     results, diagnostics = fuse_rrf(dense, sparse, rrf_k=60, top_k=3)
-    assert [result.chunk.chunk_id for result in results] == ["chk_a", "chk_c", "chk_b"]
+    assert [result.chunk.chunk_id for result in results] == [
+        "chk_alpha",
+        "chk_charlie",
+        "chk_bravo",
+    ]
     assert results[0].score == pytest.approx((1 / 61) + (1 / 62))
     assert diagnostics[0].dense_rank == 1
     assert diagnostics[0].sparse_rank == 2
@@ -102,16 +106,16 @@ def test_rrf_arithmetic_overlap_and_one_based_ranks() -> None:
 
 def test_rrf_ties_are_stable_by_chunk_id() -> None:
     results, _ = fuse_rrf(
-        (_result("chk_b", 1, 0.9, "dense"),),
-        (_result("chk_a", 1, 9.0, "sparse"),),
+        (_result("chk_bravo", 1, 0.9, "dense"),),
+        (_result("chk_alpha", 1, 9.0, "sparse"),),
     )
-    assert [result.chunk.chunk_id for result in results] == ["chk_a", "chk_b"]
+    assert [result.chunk.chunk_id for result in results] == ["chk_alpha", "chk_bravo"]
 
 
 def test_rrf_deduplicates_repeated_chunk_within_one_branch() -> None:
     repeated = (
-        _result("chk_a", 1, 0.9, "dense"),
-        _result("chk_a", 2, 0.8, "dense"),
+        _result("chk_alpha", 1, 0.9, "dense"),
+        _result("chk_alpha", 2, 0.8, "dense"),
     )
     results, diagnostics = fuse_rrf(repeated, (), rrf_k=60)
     assert len(results) == 1
