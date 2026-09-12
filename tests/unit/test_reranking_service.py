@@ -13,8 +13,8 @@ from rageval.retrieval.rerank import (
     CohereReranker,
     DeterministicFakeReranker,
     RerankConfig,
-    RerankProviderResult,
     RerankingEngine,
+    RerankProviderResult,
 )
 from rageval.retrieval.service import MultiHopMode, RetrievalService, RetrievalServiceConfig
 
