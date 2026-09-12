@@ -86,9 +86,7 @@ async def test_qdrant_upsert_filter_replace_delete_and_idempotency() -> None:
         _chunk(finance.document_id, 0, "revenue growth cash flow quarter", suffix="fin"),
         _chunk(finance.document_id, 1, "operating margin guidance", suffix="fin"),
     )
-    legal_chunks = (
-        _chunk(legal.document_id, 0, "termination clause governing law", suffix="leg"),
-    )
+    legal_chunks = (_chunk(legal.document_id, 0, "termination clause governing law", suffix="leg"),)
 
     try:
         await index.upsert_document(finance, finance_chunks, source_date=date(2024, 3, 31))
@@ -131,9 +129,7 @@ async def test_qdrant_upsert_filter_replace_delete_and_idempotency() -> None:
             finance.document_id
         }
 
-        replacement = (
-            _chunk(finance.document_id, 0, "updated revenue outlook", suffix="fin_new"),
-        )
+        replacement = (_chunk(finance.document_id, 0, "updated revenue outlook", suffix="fin_new"),)
         mutation = await index.replace_document(
             finance,
             replacement,
@@ -229,9 +225,10 @@ async def test_fixture_pipeline_retrieves_canonical_chunk_with_provenance() -> N
         retrieved = response.results[0].chunk
         assert retrieved.chunk_id == chunked.chunks[0].chunk_id
         assert retrieved.config_fingerprint == chunked.config_fingerprint
-        assert retrieved.metadata["source_element_ids"] == chunked.chunks[0].metadata[
-            "source_element_ids"
-        ]
+        assert (
+            retrieved.metadata["source_element_ids"]
+            == chunked.chunks[0].metadata["source_element_ids"]
+        )
         assert retrieved.metadata["source_pages"] == chunked.chunks[0].metadata["source_pages"]
     finally:
         await _cleanup(index)
