@@ -11,33 +11,50 @@ jobs.
 
 ### Phase 2 — Corpus contracts, fixtures, data governance, and evaluation split
 
-Implementation validated on branch `phase-02-corpus-contracts` in GitHub Actions run
-`34694976109` before final documentation/merge validation.
-
-Implemented scope:
-- versioned corpus manifest, split, duplicate, source-locator, and evaluation-binding contracts;
-- PDF/DOCX/HTML/HTM discovery without parsing document contents;
-- streaming SHA-256 checksums and deterministic document IDs;
-- explicit duplicate evidence;
-- deterministic corpus and evaluation-dataset fingerprints;
-- hard development/evaluation leakage enforcement by checksum and document identity;
-- manifest read/write, embedded-fingerprint verification, and source revalidation;
-- corpus scan/validate/fingerprint CLI;
-- real mixed-format fixtures across financial, legal, and research domains, including an image-only OCR fixture;
-- cumulative Phase 1 regression verification.
-
-Implementation validation passed Ruff, Ruff formatting, strict mypy (22 source files), 34 unit
-tests, 4 integration tests, package smoke, and the complete 38-test regression suite. Detailed
-evidence is in `docs/phases/phase-02-report.md`.
-
-## Next phase
+Merged to `main` and revalidated after merge. Phase 2 established versioned corpus/evaluation
+contracts, deterministic identities/fingerprints, duplicate/leakage protection, manifest tooling,
+and the mixed-format fixture corpus used by later phases. Detailed evidence is in
+`docs/phases/phase-02-report.md`.
 
 ### Phase 3 — Document loading, parsing, and OCR
 
-Phase 3 should consume the Phase 2 manifest/source contracts and implement normalized PDF, DOCX,
-and HTML extraction with provenance preservation and explicit OCR fallback. The committed
-image-only legal PDF must be used to prove the OCR branch is genuinely exercised.
+Branch-level implementation acceptance completed on `phase-03-document-parsing-ocr` at head
+`536d7c6ff272d3b4c7e12557775e31a8780d70a9` in GitHub Actions run `34704320300`.
 
-Cleaning, chunking, retrieval, reranking, generation, full evaluation, serving, observability,
-deployment hardening, and final release validation remain intentionally deferred to their
-respective later phases.
+Implemented scope:
+- normalized PDF/DOCX/HTML extraction through project-owned `DocumentElement` contracts;
+- page/source coordinates, section hints, headers/footers, lists, captions, page breaks, and table
+  identity/HTML where available;
+- versioned parser configuration plus deterministic parser fingerprints and element IDs;
+- explicit injectable OCR fallback with local Tesseract implementation and OCR provenance;
+- single-file and corpus-subset debug JSON CLI without indexing;
+- typed corrupt/unsupported input handling and per-file batch failure collection;
+- golden mixed-format fixture tests, a dedicated installed-Tesseract CI job, and cumulative
+  Phase 1–2 regression verification.
+
+Accepted implementation evidence: Ruff and Ruff formatting passed; strict mypy passed on 25 source
+files; 42 unit tests passed; regular integration passed 9 tests with the local-OCR-only test
+intentionally skipped there; full cumulative regression passed 51 tests with that same one skip;
+the dedicated Tesseract job installed the OCR binary and passed the skipped OCR test independently;
+Qdrant/Redis readiness, package smoke, and clean Compose teardown all passed. Detailed evidence is
+in `docs/phases/phase-03-report.md`.
+
+Phase 3 is considered implementation-complete on the branch but is not repository-closed until PR
+#3 is merged and the merge commit passes the same quality, integration, local-OCR, smoke, and
+cumulative regression gates on `main`.
+
+## Next phase
+
+### Phase 4 — Cleaning, normalization, and metadata integrity
+
+Not started. Phase 4 should consume normalized Phase 3 parse output and implement deterministic
+cleaning/normalization, repeated header/footer and boilerplate handling, near-duplicate evidence,
+and metadata preservation without damaging tables, legal clauses, research references, or source
+coordinates. It must retain cumulative Phase 1–3 verification, including the dedicated local-OCR
+job.
+
+## Later phases
+
+Chunking, embeddings/dense retrieval, sparse retrieval, fusion/query expansion, reranking/multi-hop,
+grounded generation, evaluation, serving, observability/deployment hardening, and final release
+validation remain intentionally deferred to their respective later phases.
