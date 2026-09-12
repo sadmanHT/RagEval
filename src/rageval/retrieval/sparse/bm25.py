@@ -6,7 +6,6 @@ import json
 import math
 import time
 from collections.abc import Sequence
-from datetime import date
 from pathlib import Path
 
 from rageval.core.errors import IndexingError
@@ -90,7 +89,9 @@ class BM25SparseIndex:
     ) -> None:
         expected_config_fingerprint = sparse_config_fingerprint(snapshot.config)
         if snapshot.config_fingerprint != expected_config_fingerprint:
-            raise IndexingError("sparse snapshot config fingerprint does not match its configuration")
+            raise IndexingError(
+                "sparse snapshot config fingerprint does not match its configuration"
+            )
         expected_index_fingerprint = _index_fingerprint(
             snapshot.config_fingerprint,
             snapshot.entries,
