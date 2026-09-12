@@ -33,26 +33,13 @@ Implemented scope:
 - golden mixed-format fixture tests, a dedicated installed-Tesseract CI job, and cumulative
   Phase 1–2 regression verification.
 
-Branch acceptance evidence: Ruff and Ruff formatting passed; strict mypy passed on 25 source files;
-42 unit tests passed; regular integration passed 9 tests with the local-OCR-only test intentionally
-skipped there; full cumulative regression passed 51 tests with that same one skip; the dedicated
-Tesseract job installed the OCR binary and passed the OCR test independently; Qdrant/Redis
-readiness, package smoke, and clean Compose teardown all passed. The final evidence head repeated
-the three CI gates successfully before merge, and the merge commit repeated them successfully on
-`main`. Detailed evidence is in `docs/phases/phase-03-report.md`.
-
-## Accepted on branch; repository closure pending
+Detailed evidence is in `docs/phases/phase-03-report.md`.
 
 ### Phase 4 — Cleaning, normalization, deduplication, and metadata integrity
 
-Branch: `phase-04-cleaning-normalization`.
-
-Implementation/evidence head `097d9a27b335bf125a688c90ca10be42cb7f2c00` passed GitHub Actions
-run `34705690248`: Ruff and formatter passed, strict mypy passed on 29 source files, 53 unit tests
-passed, 14 regular integration tests passed with one intentional local-OCR-only skip, the package
-smoke passed, and the full regression suite passed 67 tests with that same one skip. The dedicated
-local-OCR job installed Tesseract 5.3.4 and passed its real OCR fixture test independently. Qdrant
-and Redis readiness plus clean Compose teardown passed.
+Merged to `main` as PR #4 at commit `4366bb0f5a5a7a4f7184eb24fdf744d9eddfb502` and revalidated
+post-merge in GitHub Actions run `34705921835`. The merge commit passed quality,
+integration/regression/statistics, and the dedicated installed-Tesseract OCR job.
 
 Implemented scope:
 - deterministic Unicode/control/whitespace/hyphenation normalization that retains meaningful
@@ -67,18 +54,20 @@ Implemented scope:
 - financial/legal/research noisy golden cleaning tests plus inherited Phase 2/3 fixture
   preservation tests.
 
-Measured CI evidence distinguishes preservation from reduction. The inherited five fixtures were
-already clean and correctly remained 13 -> 13 elements and 719 -> 719 characters. The dedicated
-noisy Phase 4 goldens reduced 37 -> 13 elements and 1,239 -> 636 characters while removing 603
+Acceptance evidence: Ruff and formatter passed; strict mypy passed on 29 source files; 53 unit
+tests passed; 14 regular integration tests passed with one intentional local-OCR-only skip; the
+package smoke passed; the complete regression suite passed 67 tests with the same one skip; and the
+dedicated local-OCR job installed Tesseract 5.3.4 and passed its real OCR test independently.
+Qdrant/Redis readiness and clean Compose teardown also passed.
+
+Measured cleaning evidence distinguishes preservation from reduction. The inherited five fixtures
+were already clean and correctly remained 13 -> 13 elements and 719 -> 719 characters. The noisy
+Phase 4 goldens reduced 37 -> 13 elements and 1,239 -> 636 characters while removing 603
 characters, 6 duplicate boilerplate elements, and 24 total boilerplate/page-artifact elements; the
 financial structured table remained preserved. Detailed evidence is in
 `docs/phases/phase-04-report.md`.
 
-Phase 4 is not repository-complete until the final documentation head passes all PR checks, PR #4
-is merged, and the merge commit passes quality, integration/regression/statistics, and installed-
-Tesseract validation again on `main`.
-
-## Next phase after Phase 4 closure
+## Next phase
 
 ### Phase 5 — Chunking ablation and table-aware boundaries
 

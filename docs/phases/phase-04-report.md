@@ -2,13 +2,18 @@
 
 ## Status
 
-Implementation accepted on branch `phase-04-cleaning-normalization`; repository closure remains
-pending the final documentation-head CI run, PR merge, and post-merge `main` revalidation.
+Complete. Phase 4 merged to `main` as PR #4 at merge commit
+`4366bb0f5a5a7a4f7184eb24fdf744d9eddfb502` after the final PR head passed all quality,
+integration/regression/statistics, and installed-Tesseract OCR gates. The merge commit then repeated
+all three jobs successfully on `main` in GitHub Actions run `34705921835`.
 
 Validated implementation/evidence head:
-`097d9a27b335bf125a688c90ca10be42cb7f2c00`
+`097d9a27b335bf125a688c90ca10be42cb7f2c00`.
 
-GitHub Actions acceptance run: `34705690248`.
+Implementation acceptance run: `34705690248`.
+Final PR documentation head: `663c7881cdedab9388f41defe692c4c2e517b954`.
+Final PR-head CI run: `34705879334`.
+Post-merge `main` CI run: `34705921835`.
 
 ## Implemented scope
 
@@ -97,16 +102,17 @@ noise removal without inventing reductions in the inherited corpus.
 
 ## Verification evidence
 
-Acceptance run `34705690248` completed all three CI jobs successfully.
+Implementation acceptance run `34705690248`, final PR-head run `34705879334`, and post-merge
+`main` run `34705921835` all completed the relevant three CI jobs successfully.
 
-Quality job:
+Quality evidence on the accepted implementation:
 
 - `ruff check .` — passed;
 - `ruff format --check .` — passed, 67 files already formatted;
 - `mypy src` — passed, no issues in 29 source files;
 - `pytest -q tests/unit` — 53 passed.
 
-Integration/regression job:
+Integration/regression evidence:
 
 - `docker compose config` — passed;
 - Qdrant and Redis start/readiness — passed;
@@ -118,7 +124,7 @@ Integration/regression job:
 - `pytest -q` — 67 passed, 1 skipped (the same local-OCR-only test);
 - Compose teardown with volumes — passed.
 
-Dedicated local-OCR job:
+Dedicated local-OCR evidence:
 
 - installed Tesseract 5.3.4 from Ubuntu packages;
 - `pytest -q -m local_ocr tests/integration/test_local_ocr.py` — 1 passed.
@@ -215,7 +221,3 @@ reclean source files. Chunking must preserve Phase 4 `source_element_id` provena
 boundaries while implementing controlled fixed-token 256/512/1024 and semantic chunking
 strategies. The preferred strategy and any per-domain differences must be established by measured
 ablation evidence rather than copied from the reference document.
-
-Repository closure for Phase 4 still requires the final documentation head to pass all three PR CI
-jobs, PR #4 to merge, and the merge commit to pass quality, integration/regression/statistics, and
-installed-Tesseract validation on `main`.

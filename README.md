@@ -5,12 +5,10 @@ to make retrieval and generation quality measurable, reproducible, and debuggabl
 
 ## Current status
 
-Phases 1–3 are merged and verified on `main`. Phase 4 cleaning/normalization is implemented on
-`phase-04-cleaning-normalization` and has passed its implementation acceptance run; final PR-head,
-merge, and post-merge `main` validation remain required before repository closure.
+Phases 1–4 are merged and verified on `main`. The current pipeline covers repository/quality
+foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading, explicit OCR
+fallback, and a provenance-preserving cleaning boundary.
 
-The current pipeline covers repository/quality foundations, deterministic corpus governance,
-normalized PDF/DOCX/HTML loading, OCR fallback, and a provenance-preserving cleaning boundary.
 Cleaning normalizes Unicode/control/whitespace/hyphenation artifacts, suppresses evidenced repeated
 headers/footers/page numbers, conservatively deduplicates evidenced boilerplate, preserves table
 row/cell relationships and structured metadata, and emits deterministic cleaned IDs linked to their
