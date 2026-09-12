@@ -13,10 +13,12 @@ from rageval.retrieval.dense.providers import (
     OpenAIEmbeddingProvider,
 )
 from rageval.retrieval.dense.qdrant import QdrantDenseIndex, point_id_for_chunk
+from rageval.retrieval.dense.retriever import DenseRetriever
 
 __all__ = [
     "DenseEmbeddingProvider",
     "DenseIndexConfig",
+    "DenseRetriever",
     "DenseSearchFilter",
     "DenseSearchResponse",
     "IndexConsistencyReport",
