@@ -4,7 +4,7 @@ from datetime import date
 from pathlib import Path
 
 import pytest
-from qdrant_client import AsyncQdrantClient, models
+from qdrant_client import models
 
 from rageval.chunking import ChunkingEngine, ChunkStrategy, reference_chunking_config
 from rageval.cleaning import clean_parsed_document
@@ -99,7 +99,8 @@ async def test_qdrant_upsert_filter_replace_delete_and_idempotency() -> None:
         assert count.count == 3
         consistency = await index.check_document_consistency(finance.document_id, finance_chunks)
         assert consistency.consistent is True
-        assert consistency.indexed_chunk_ids == tuple(sorted(chunk.chunk_id for chunk in finance_chunks))
+        expected_ids = tuple(sorted(chunk.chunk_id for chunk in finance_chunks))
+        assert consistency.indexed_chunk_ids == expected_ids
 
         exact = await index.search(finance_chunks[0].text, top_k=3)
         assert exact.results[0].chunk.chunk_id == finance_chunks[0].chunk_id
