@@ -205,9 +205,7 @@ class BM25SparseIndex:
             term_frequency = entry.term_frequencies.get(term, 0)
             if term_frequency <= 0:
                 continue
-            saturation = (term_frequency * (self.config.k1 + 1.0)) / (
-                term_frequency + length_norm
-            )
+            saturation = (term_frequency * (self.config.k1 + 1.0)) / (term_frequency + length_norm)
             if self.config.variant is BM25Variant.BM25_PLUS:
                 saturation += self.config.delta
             score += self._idf(term) * saturation * query_frequency
