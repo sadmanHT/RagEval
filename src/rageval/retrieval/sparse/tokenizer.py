@@ -64,7 +64,9 @@ class DomainAwareTokenizer:
     def tokenize(self, text: str, *, domain: Domain | None = None) -> tuple[str, ...]:
         """Return normalized lexical tokens while retaining domain-specific exact forms."""
         tokens: list[str] = []
-        protected = _DOMAIN_PROTECTED.get(domain, frozenset())
+        protected: frozenset[str] = (
+            _DOMAIN_PROTECTED[domain] if domain is not None else frozenset()
+        )
         for match in _TOKEN_RE.finditer(text):
             token = _normalize(match.group(0), lowercase=self.config.lowercase)
             if not token:
