@@ -31,9 +31,7 @@ SELECTED_FIXTURES = (
 async def build_report() -> dict[str, object]:
     manifest = scan_corpus(FIXTURE_ROOT).manifest
     selected = [
-        item
-        for item in manifest.documents
-        if Path(item.relative_path).name in SELECTED_FIXTURES
+        item for item in manifest.documents if Path(item.relative_path).name in SELECTED_FIXTURES
     ]
     chunk_config = reference_chunking_config(ChunkStrategy.FIXED_512)
     provider = LocalHashDenseEmbeddingProvider(dimension=64)
@@ -117,8 +115,7 @@ async def build_report() -> dict[str, object]:
                 filters=DenseSearchFilter(domain=domain),
             )
             if any(
-                result.chunk.metadata.get("domain") != domain.value
-                for result in response.results
+                result.chunk.metadata.get("domain") != domain.value for result in response.results
             ):
                 raise RuntimeError(f"domain filter leaked results for {domain.value}")
             domain_counts[domain.value] = len(response.results)
