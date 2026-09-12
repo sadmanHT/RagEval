@@ -158,7 +158,7 @@ async def _run() -> dict[str, object]:
             "chunk_strategy": "fixed_512",
             "dense_provider": dense_provider.name,
             "dense_provider_evidence": "local-hash-diagnostic-only",
-            "sparse_index_fingerprint": sparse.index_fingerprint,
+            "sparse_index_fingerprint": sparse.snapshot.index_fingerprint,
             "service_config_fingerprint": final.service_config_fingerprint,
             "rerank_config_fingerprint": final.rerank_config_fingerprint,
             "documents": documents,
