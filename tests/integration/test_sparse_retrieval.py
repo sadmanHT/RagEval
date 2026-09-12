@@ -9,6 +9,7 @@ from rageval.cleaning import clean_parsed_document
 from rageval.corpus.manifest import scan_corpus
 from rageval.ingestion.loaders import parse_corpus_document
 from rageval.ingestion.models import OCRMode, ParserConfig
+from rageval.models.contracts import Chunk
 from rageval.retrieval.sparse import BM25SparseIndex, SparseDocumentInput, SparseSearchFilter
 
 FIXTURE_ROOT = Path(__file__).parents[1] / "fixtures" / "corpus"
@@ -29,7 +30,7 @@ async def test_phase5_chunks_to_sparse_results_preserve_identity_and_provenance(
     ]
     chunk_config = reference_chunking_config(ChunkStrategy.FIXED_512)
     documents: list[SparseDocumentInput] = []
-    expected_chunks: dict[str, object] = {}
+    expected_chunks: dict[str, Chunk] = {}
 
     for item in selected:
         parsed = parse_corpus_document(
@@ -78,13 +79,7 @@ async def test_phase5_chunks_to_sparse_results_preserve_identity_and_provenance(
         result = response.results[0]
         assert result.chunk.chunk_id == target.chunk.chunk_id
         assert result.chunk == expected_chunks[target.chunk.chunk_id]
-        assert result.chunk.config_fingerprint == chunk_config_fingerprint(target.chunk)
+        assert result.chunk.config_fingerprint == target.chunk.config_fingerprint
         assert result.chunk.metadata.get("source_element_ids")
         assert result.metadata["matched_terms"] == [unique_terms[0]]
         assert result.retriever == "sparse-bm25_plus"
-
-
-def chunk_config_fingerprint(chunk: object) -> str:
-    value = getattr(chunk, "config_fingerprint", None)
-    assert isinstance(value, str)
-    return value
