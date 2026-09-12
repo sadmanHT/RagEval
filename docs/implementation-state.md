@@ -41,18 +41,53 @@ readiness, package smoke, and clean Compose teardown all passed. The final evide
 the three CI gates successfully before merge, and the merge commit repeated them successfully on
 `main`. Detailed evidence is in `docs/phases/phase-03-report.md`.
 
-## Next phase
+## Accepted on branch; repository closure pending
 
-### Phase 4 — Cleaning, normalization, and metadata integrity
+### Phase 4 — Cleaning, normalization, deduplication, and metadata integrity
 
-Not started. Phase 4 should consume normalized Phase 3 parse output and implement deterministic
-cleaning/normalization, repeated header/footer and boilerplate handling, near-duplicate evidence,
-and metadata preservation without damaging tables, legal clauses, research references, or source
-coordinates. It must retain cumulative Phase 1–3 verification, including the dedicated local-OCR
-job.
+Branch: `phase-04-cleaning-normalization`.
+
+Implementation/evidence head `097d9a27b335bf125a688c90ca10be42cb7f2c00` passed GitHub Actions
+run `34705690248`: Ruff and formatter passed, strict mypy passed on 29 source files, 53 unit tests
+passed, 14 regular integration tests passed with one intentional local-OCR-only skip, the package
+smoke passed, and the full regression suite passed 67 tests with that same one skip. The dedicated
+local-OCR job installed Tesseract 5.3.4 and passed its real OCR fixture test independently. Qdrant
+and Redis readiness plus clean Compose teardown passed.
+
+Implemented scope:
+- deterministic Unicode/control/whitespace/hyphenation normalization that retains meaningful
+  punctuation and numeric syntax;
+- cross-page repeated header/footer/page-number suppression rather than blind deletion;
+- conservative configurable near-duplicate boilerplate detection with typed removal evidence;
+- preservation of table row/cell delimiters and structured metadata (`table_html`, coordinates,
+  source offsets, sections, and page provenance);
+- deterministic cleaned element IDs linked back through `source_element_id`;
+- immutable cleaning configuration plus deterministic configuration fingerprint;
+- per-document cleaning statistics and a permanent CI statistics command;
+- financial/legal/research noisy golden cleaning tests plus inherited Phase 2/3 fixture
+  preservation tests.
+
+Measured CI evidence distinguishes preservation from reduction. The inherited five fixtures were
+already clean and correctly remained 13 -> 13 elements and 719 -> 719 characters. The dedicated
+noisy Phase 4 goldens reduced 37 -> 13 elements and 1,239 -> 636 characters while removing 603
+characters, 6 duplicate boilerplate elements, and 24 total boilerplate/page-artifact elements; the
+financial structured table remained preserved. Detailed evidence is in
+`docs/phases/phase-04-report.md`.
+
+Phase 4 is not repository-complete until the final documentation head passes all PR checks, PR #4
+is merged, and the merge commit passes quality, integration/regression/statistics, and installed-
+Tesseract validation again on `main`.
+
+## Next phase after Phase 4 closure
+
+### Phase 5 — Chunking ablation and table-aware boundaries
+
+Phase 5 must consume cleaned Phase 4 elements, preserve source-element provenance and table
+boundaries, and implement controlled fixed-token 256/512/1024 plus semantic chunking strategies.
+No preferred chunking strategy may be claimed without measured ablation evidence.
 
 ## Later phases
 
-Chunking, embeddings/dense retrieval, sparse retrieval, fusion/query expansion, reranking/multi-hop,
+Embeddings/dense retrieval, sparse retrieval, fusion/query expansion, reranking/multi-hop,
 grounded generation, evaluation, serving, observability/deployment hardening, and final release
 validation remain intentionally deferred to their respective later phases.
