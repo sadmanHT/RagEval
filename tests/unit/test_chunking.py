@@ -301,9 +301,7 @@ async def test_chunk_ids_and_config_fingerprints_are_deterministic() -> None:
     )
 
     assert first.config_fingerprint == second.config_fingerprint
-    assert [chunk.chunk_id for chunk in first.chunks] == [
-        chunk.chunk_id for chunk in second.chunks
-    ]
+    assert [chunk.chunk_id for chunk in first.chunks] == [chunk.chunk_id for chunk in second.chunks]
     assert changed.config_fingerprint != first.config_fingerprint
     assert changed.chunks[0].chunk_id != first.chunks[0].chunk_id
 
