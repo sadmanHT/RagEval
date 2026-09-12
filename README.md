@@ -4,15 +4,13 @@ RAG-Eval is a production-oriented Retrieval-Augmented Generation system whose pr
 
 ## Current status
 
-Phases 1–6 are merged and verified on `main`. The current pipeline covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking strategies, and reproducible dense retrieval over versioned Qdrant collections.
+Phases 1–6 are merged and verified on `main`. Phase 7 sparse retrieval is implemented and accepted on PR #7, with merge/post-merge closure still pending. The current pipeline covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking strategies, reproducible dense retrieval over versioned Qdrant collections, and deterministic BM25/BM25+ lexical retrieval over the same canonical chunk identities.
 
-Phase 6 dense retrieval consumes canonical Phase 5 chunks, embeds them behind a replaceable provider boundary, preserves stable chunk/configuration/provenance identity in reconstructable Qdrant payloads, and returns the existing canonical `RetrievalResult` contract. It supports domain, source-date, document, and chunking-configuration filters; deterministic idempotent point identity; document replace/delete/consistency operations; configurable HNSW/search parameters; and explicit stale-vector-schema errors.
+Phase 6 dense retrieval consumes canonical Phase 5 chunks, embeds them behind a replaceable provider boundary, preserves stable chunk/configuration/provenance identity in reconstructable Qdrant payloads, and returns the canonical `RetrievalResult` contract. The deterministic/local acceptance path uses a local hashed embedding adapter for mechanics and real-Qdrant integration only; live OpenAI validation remains unrun without credentials.
 
-The deterministic/local acceptance path uses a 64-dimensional local hashed embedding adapter for mechanics and real-Qdrant integration only. The hosted reference adapter targets OpenAI `text-embedding-3-large` with a 3072-dimensional default, but no live OpenAI result is claimed without an actual credential-enabled run.
+Phase 7 sparse retrieval implements BM25/BM25+ with a conservative domain-aware tokenizer. It preserves exact forms such as `10-K`, `Q3`, ticker symbols, percentages, legal clause/section references, acronyms, `BM25+`, and hyphenated technical terms. Sparse search supports domain, document, source-date, and chunking-configuration filters, deterministic index/configuration fingerprints, snapshot save/load integrity checks, and diagnostics for query tokens, matched terms, rank, score, and matched-term frequency.
 
-Chunking continues to support fixed 256/32, 512/64, and 1024/128 configurations plus provider-injected semantic splitting and table-aware whole-row boundaries. The small committed fixtures verify mechanics/provenance rather than selecting a globally optimal chunking or embedding strategy.
-
-Phase 7 — BM25 sparse retrieval — is next.
+Dense and sparse retrieval share canonical chunk IDs and `RetrievalResult` output, but their raw scores are intentionally not normalized against each other. The small committed fixtures verify mechanics/provenance and exact lexical recovery, not production retrieval quality or a globally preferred retriever.
 
 ## Quick start
 
@@ -25,6 +23,7 @@ cp .env.example .env
 make verify
 make integration
 make dense-report
+make sparse-report
 make smoke
 ```
 
@@ -63,15 +62,25 @@ python -m rageval.chunking.cli ./data/raw/evaluation/research/paper.html \
   --domain research --strategy semantic --output ./tmp/paper.semantic-chunks.json
 ```
 
+Query a persisted sparse snapshot with lexical diagnostics:
+
+```bash
+python -m rageval.retrieval.sparse.cli ./tmp/sparse-index.json "Section 7.4" \
+  --domain legal --top-k 20
+```
+
 Reproduce the deterministic fixture evidence used by CI:
 
 ```bash
 python scripts/cleaning_fixture_report.py
 python scripts/chunking_fixture_report.py
 python scripts/dense_fixture_report.py
+python scripts/sparse_fixture_report.py
 ```
 
 The dense fixture report starts from the committed source fixtures, parses/cleans/chunks them, indexes them in a real local Qdrant container, verifies consistency and filters, performs canonical retrieval sanity checks, emits machine-readable JSON, and deletes its temporary collection.
+
+The sparse fixture report starts from the same committed source fixtures, parses/cleans/chunks them, builds the deterministic BM25+ index, verifies order-independent rebuild and snapshot round-trip identity, performs exact-term lexical retrieval checks with provenance intact, and emits machine-readable JSON.
 
 The corpus layout is `<root>/<development|evaluation>/<financial|legal|research>/<file>`.
 Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
@@ -87,7 +96,9 @@ Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
 - Cleaning is configuration-fingerprinted, auditable, and conservative about deleting repeated answer-bearing body content.
 - Chunking consumes cleaned elements, preserves table/source provenance, and fingerprints every behavior-affecting configuration.
 - Dense indexing preserves canonical chunk IDs/configuration/provenance, validates collection schemas before reuse, and keeps external embeddings behind replaceable providers.
-- Local-hash dense evidence validates mechanics, not learned semantic quality; live-provider and representative retrieval-quality evidence must be reported separately when actually run.
+- Sparse indexing preserves the same canonical chunk identity, fingerprints scoring/tokenization behavior, and keeps filter semantics explicit rather than rebuilding corpus statistics per query.
+- Local-hash dense evidence and tiny sparse fixtures validate mechanics, not learned semantic quality or production retrieval quality.
+- Dense cosine and BM25 scores are not directly comparable; hybrid retrieval should fuse rankings by identity/rank rather than naïve raw-score arithmetic.
 - No chunking or retrieval strategy is considered preferable without representative evaluation evidence.
 - Every phase must pass its own tests and the cumulative regression suite before completion.
 
