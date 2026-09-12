@@ -51,12 +51,34 @@ Accepted implementation evidence: Ruff and formatter passed with 100 files forma
 
 These sparse scores and exact-term fixtures are mechanics/provenance evidence only, not a production retrieval benchmark or evidence that BM25/BM25+ is globally better than dense retrieval. Detailed evidence and limitations are in `docs/phases/phase-07-report.md`.
 
+## Accepted implementation — pending merge closure
+
+### Phase 8 — Concurrent hybrid retrieval, Reciprocal Rank Fusion, and query expansion
+
+Phase 8 implementation is accepted on draft PR #8 at head `4b6673e0aa4f63080d99730e8f4a87c9144cdc76`. GitHub Actions run `34717256908` passed quality, real-Qdrant/BM25 integration, cleaning/chunking/dense/sparse/hybrid fixture evidence, package smoke, full cumulative regression, and dedicated installed-Tesseract OCR. PR merge and independent post-merge `main` validation remain required before final closure.
+
+Implemented scope:
+
+- one hybrid retriever composing the existing Phase 6 dense and Phase 7 sparse search contracts rather than duplicating their scoring/index logic;
+- concurrent dense and sparse branch execution with sibling cancellation and typed failure propagation;
+- deterministic one-based Reciprocal Rank Fusion using `1 / (k + rank)` with default `k=60` and reference branch top-k 20;
+- canonical chunk-ID deduplication, collision protection, stable tie ordering, and preservation of dense/sparse ranks, raw scores, RRF contributions, and final rank;
+- common domain/document/source-date/chunk-config filters translated consistently to both branches;
+- optional versioned/fingerprinted query expansion behind an async provider boundary;
+- deterministic dictionary expansion baseline with bounded count/length, deduplication, and guaranteed original-query retention;
+- per-branch and total latency diagnostics plus a sequential diagnostic path for measured local comparison;
+- permanent hybrid fixture evidence while retaining every previous cleaning/chunking/dense/sparse/full-regression/OCR gate.
+
+Accepted implementation evidence: Ruff passed and formatter reported 110 files already formatted; strict mypy passed on 51 source files; 103 unit tests passed; ordinary integration passed 26 tests with one intentional local-OCR-only skip; full cumulative regression passed 129 tests with the same skip; and dedicated Tesseract 5.3.4 validation passed 1 test. The hybrid report built 6 canonical chunks from 4 source documents with hybrid config fingerprint `37c45f72ab83fb04e27f4185e7f56456b5b6ea462adca6598093b7195a680c08`, recovered the expected lexical chunk with dense rank 1 + sparse rank 1, and demonstrated observable bounded `turnover -> revenue` expansion.
+
+The three-sample local timing fixture did not show a concurrency speedup: concurrent median was approximately 6.382 ms and sequential median approximately 6.221 ms. This is recorded as negative timing evidence, not converted into an improvement claim. The local-hash dense provider remains mechanics-only evidence, and no hosted expansion provider or target-corpus hybrid benchmark is claimed. Detailed evidence and limitations are in `docs/phases/phase-08-report.md`.
+
 ## Next phase
 
-### Phase 8 — Hybrid retrieval, Reciprocal Rank Fusion, and query expansion
+### Phase 9 — Reranking and multi-hop retrieval service
 
-Phase 8 should combine dense and sparse rankings by canonical `chunk_id` using Reciprocal Rank Fusion with the reference smoothing constant `k=60`. Dense cosine and BM25 scores must remain independently auditable and must not be naïvely normalized or added. Any query-expansion behavior should be explicit, configuration-fingerprinted, deterministic in the baseline path, and evaluated separately from fusion.
+Phase 9 should consume Phase 8 fused candidates by canonical `chunk_id`, add cross-encoder/hosted reranking behind explicit provider abstractions, and preserve dense/sparse/RRF/query-expansion diagnostics through the reranked result set. Multi-hop behavior must remain diagnosable and evaluation-backed rather than silently broadening retrieval.
 
 ## Later phases
 
-Reranking/multi-hop, grounded generation, evaluation, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
+Grounded generation, evaluation, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
