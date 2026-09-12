@@ -116,7 +116,10 @@ async def build_report() -> dict[str, object]:
                 top_k=100,
                 filters=DenseSearchFilter(domain=domain),
             )
-            if any(result.chunk.metadata.get("domain") != domain.value for result in response.results):
+            if any(
+                result.chunk.metadata.get("domain") != domain.value
+                for result in response.results
+            ):
                 raise RuntimeError(f"domain filter leaked results for {domain.value}")
             domain_counts[domain.value] = len(response.results)
 
