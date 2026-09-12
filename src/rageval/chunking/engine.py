@@ -7,11 +7,6 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
-from rageval.cleaning.models import CleanedDocument
-from rageval.core.ids import fingerprint_mapping, make_chunk_id
-from rageval.core.protocols import EmbeddingProvider
-from rageval.models.contracts import Chunk, DocumentElement, Domain, ElementType
-
 from rageval.chunking.models import ChunkingConfig, ChunkingResult, ChunkStrategy
 from rageval.chunking.tokenizer import (
     Tokenizer,
@@ -19,6 +14,10 @@ from rageval.chunking.tokenizer import (
     sentence_segments,
     starts_legal_clause,
 )
+from rageval.cleaning.models import CleanedDocument
+from rageval.core.ids import fingerprint_mapping, make_chunk_id
+from rageval.core.protocols import EmbeddingProvider
+from rageval.models.contracts import Chunk, DocumentElement, Domain, ElementType
 
 
 @dataclass(frozen=True)
