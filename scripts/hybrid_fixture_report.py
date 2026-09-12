@@ -104,9 +104,7 @@ async def build_report() -> dict[str, object]:
             raise RuntimeError("financial fixture produced no chunks")
         target = financial_chunks[0]
         entry = next(
-            entry
-            for entry in sparse.snapshot.entries
-            if entry.chunk.chunk_id == target.chunk_id
+            entry for entry in sparse.snapshot.entries if entry.chunk.chunk_id == target.chunk_id
         )
         unique_terms = sorted(
             term
