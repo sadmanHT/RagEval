@@ -8,11 +8,11 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any, Protocol
 
+import pymupdf  # type: ignore[import-untyped]
 from bs4 import BeautifulSoup, Tag  # type: ignore[import-untyped]
 from docx import Document as OpenDocument  # type: ignore[import-untyped]
 from docx.table import Table  # type: ignore[import-untyped]
 from docx.text.paragraph import Paragraph  # type: ignore[import-untyped]
-import pymupdf  # type: ignore[import-untyped]
 
 from rageval.core.errors import DocumentParseError, OCRUnavailableError, UnsupportedSourceError
 from rageval.core.ids import fingerprint_mapping, make_element_id
