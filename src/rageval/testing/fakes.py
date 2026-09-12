@@ -14,6 +14,8 @@ from rageval.models.contracts import (
 
 class FakeEmbeddingProvider:
     name = "fake-embedding"
+    model = "deterministic-v1"
+    dimension = 2
 
     async def embed(self, texts: Sequence[str]) -> list[list[float]]:
         return [[float(len(text)), float(sum(map(ord, text)) % 997)] for text in texts]
