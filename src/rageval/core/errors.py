@@ -9,6 +9,10 @@ class ValidationError(RagEvalError):
     """Input or configuration validation failed."""
 
 
+class DataLeakageError(ValidationError):
+    """Development/tuning and held-out evaluation data overlap."""
+
+
 class ProviderError(RagEvalError):
     """An external or local model provider failed."""
 
