@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from rageval.corpus.manifest import read_manifest, scan_corpus, validate_manifest_files, write_manifest
+from rageval.corpus.manifest import (
+    read_manifest,
+    scan_corpus,
+    validate_manifest_files,
+    write_manifest,
+)
 from rageval.corpus.models import DatasetSplit
 from rageval.models import Domain, SourceType
 

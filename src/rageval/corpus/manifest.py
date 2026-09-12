@@ -65,7 +65,7 @@ def _canonical_document(document: CorpusDocument) -> dict[str, object]:
 
 
 def fingerprint_documents(documents: tuple[CorpusDocument, ...] | list[CorpusDocument]) -> str:
-    """Fingerprint corpus identity independent of input ordering and scan timestamps."""
+    """Fingerprint corpus identity independently of input ordering and scan timestamps."""
 
     canonical = [_canonical_document(document) for document in documents]
     canonical.sort(
@@ -104,20 +104,21 @@ def assert_no_split_leakage(documents: tuple[CorpusDocument, ...] | list[CorpusD
 
     checksum_splits: dict[str, set[DatasetSplit]] = defaultdict(set)
     id_splits: dict[str, set[DatasetSplit]] = defaultdict(set)
-
     for document in documents:
         checksum_splits[document.record.checksum_sha256].add(document.split)
         id_splits[document.record.document_id].add(document.split)
 
     leaked_checksums = sorted(key for key, splits in checksum_splits.items() if len(splits) > 1)
     leaked_ids = sorted(key for key, splits in id_splits.items() if len(splits) > 1)
-    if leaked_checksums or leaked_ids:
-        details: list[str] = []
-        if leaked_checksums:
-            details.append(f"checksums={','.join(leaked_checksums)}")
-        if leaked_ids:
-            details.append(f"document_ids={','.join(leaked_ids)}")
-        raise DataLeakageError("development/evaluation leakage detected: " + "; ".join(details))
+    if not leaked_checksums and not leaked_ids:
+        return
+
+    details: list[str] = []
+    if leaked_checksums:
+        details.append(f"checksums={','.join(leaked_checksums)}")
+    if leaked_ids:
+        details.append(f"document_ids={','.join(leaked_ids)}")
+    raise DataLeakageError("development/evaluation leakage detected: " + "; ".join(details))
 
 
 def _parse_layout(relative_path: Path) -> tuple[DatasetSplit, Domain]:
@@ -141,6 +142,11 @@ def _parse_layout(relative_path: Path) -> tuple[DatasetSplit, Domain]:
     return split, domain
 
 
+def _logical_title(path: Path) -> str:
+    normalized = path.stem.replace("_", " ").replace("-", " ").strip()
+    return normalized or path.name
+
+
 def scan_corpus(root: Path, *, fail_on_unsupported: bool = False) -> ScanReport:
     """Discover supported source files without parsing their document contents."""
 
@@ -152,11 +158,10 @@ def scan_corpus(root: Path, *, fail_on_unsupported: bool = False) -> ScanReport:
 
     documents: list[CorpusDocument] = []
     unsupported: list[str] = []
-
-    for path in sorted(candidate for candidate in root.rglob("*") if candidate.is_file()):
+    candidates = sorted(candidate for candidate in root.rglob("*") if candidate.is_file())
+    for path in candidates:
         relative = path.relative_to(root)
-        suffix = path.suffix.lower()
-        source_type = _SUPPORTED_SUFFIXES.get(suffix)
+        source_type = _SUPPORTED_SUFFIXES.get(path.suffix.lower())
         if source_type is None:
             unsupported.append(relative.as_posix())
             continue
@@ -175,7 +180,7 @@ def scan_corpus(root: Path, *, fail_on_unsupported: bool = False) -> ScanReport:
             CorpusDocument(
                 record=record,
                 relative_path=relative.as_posix(),
-                logical_title=path.stem.replace("_", " ").replace("-", " ").strip() or path.name,
+                logical_title=_logical_title(path),
                 split=split,
                 size_bytes=path.stat().st_size,
             )
@@ -195,7 +200,7 @@ def scan_corpus(root: Path, *, fail_on_unsupported: bool = False) -> ScanReport:
 
 
 def write_manifest(manifest: CorpusManifest, path: Path) -> None:
-    """Write deterministic JSON fields while retaining generated-at audit metadata."""
+    """Write validated manifest JSON with audit metadata retained."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(manifest.model_dump_json(indent=2) + "\n", encoding="utf-8")
@@ -238,5 +243,6 @@ def validate_manifest_files(manifest: CorpusManifest, root: Path) -> None:
         if actual != document.record.checksum_sha256:
             raise ValidationError(
                 "manifest checksum mismatch for "
-                f"{document.relative_path}: stored={document.record.checksum_sha256} actual={actual}"
+                f"{document.relative_path}: stored={document.record.checksum_sha256} "
+                f"actual={actual}"
             )
