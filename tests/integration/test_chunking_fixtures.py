@@ -68,7 +68,21 @@ async def test_domain_fixtures_chunk_with_full_provenance(
         for element_id in chunk.metadata["cleaned_element_ids"]
     }
     assert covered == expected
-    assert all(chunk.metadata["source_pages"] for chunk in result.chunks)
+
+    expected_pages = {
+        element.page_number
+        for element in cleaned.elements
+        if element.kind is not ElementType.PAGE_BREAK
+        and element.text.strip()
+        and element.page_number is not None
+    }
+    observed_pages = {
+        page
+        for chunk in result.chunks
+        for page in chunk.metadata["source_pages"]
+        if isinstance(page, int)
+    }
+    assert observed_pages == expected_pages
 
 
 @pytest.mark.asyncio
