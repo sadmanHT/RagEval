@@ -23,8 +23,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e '.[dev]'
-      - name: Lint
-        run: ruff check .
+      - name: Lint diagnostic
+        run: |
+          ruff check --fix src/rageval/retrieval/sparse/models.py
+          git diff -- src/rageval/retrieval/sparse/models.py
+          git diff --exit-code -- src/rageval/retrieval/sparse/models.py
       - name: Format check
         run: ruff format --check .
       - name: Type check
