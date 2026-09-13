@@ -15,7 +15,8 @@ from rageval.generation.models import LLMProviderResponse
 
 _QUESTION_RE = re.compile(r"QUESTION:\n(.*?)\n\nALLOWED_CHUNK_IDS:", re.DOTALL)
 _CONTEXT_RE = re.compile(
-    r'\[CONTEXT_CHUNK id="([^"]+)"[^\]]*\]\nSOURCE_METADATA:.*?\nCONTENT:\n(.*?)\n\[/CONTEXT_CHUNK\]',
+    r'\[CONTEXT_CHUNK id="([^"]+)"[^\]]*\]\nSOURCE_METADATA:'
+    r'.*?\nCONTENT:\n(.*?)\n\[/CONTEXT_CHUNK\]',
     re.DOTALL,
 )
 
@@ -67,7 +68,10 @@ class DeterministicFakeGenerationProvider:
             if question in self._refuse_questions or context_match is None:
                 content = json.dumps(
                     {
-                        "answer": "Insufficient context: the retrieved evidence does not support an answer.",
+                        "answer": (
+                            "Insufficient context: the retrieved evidence does not support an "
+                            "answer."
+                        ),
                         "citations": [],
                         "insufficient_context": True,
                         "refusal_reason": "deterministic fixture marked the question unsupported",
@@ -178,9 +182,11 @@ class OpenAIGenerationProvider:
             except (httpx.TimeoutException, httpx.NetworkError) as exc:
                 last_error = exc
                 if attempt + 1 >= self.max_attempts:
-                    raise ProviderError(
-                        f"OpenAI generation request failed after {self.max_attempts} attempts: {exc}"
-                    ) from exc
+                    message = (
+                        f"OpenAI generation request failed after {self.max_attempts} "
+                        f"attempts: {exc}"
+                    )
+                    raise ProviderError(message) from exc
                 await self._backoff(attempt)
             except httpx.HTTPError as exc:
                 raise ProviderError(f"OpenAI generation request failed: {exc}") from exc

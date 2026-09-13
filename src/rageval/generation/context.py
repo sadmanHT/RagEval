@@ -8,8 +8,8 @@ from collections.abc import Sequence
 
 from rageval.chunking.tokenizer import Tokenizer, WhitespaceTokenizer
 from rageval.core.ids import fingerprint_mapping
-from rageval.models.contracts import RerankResult
 from rageval.generation.models import AssembledContext, ContextAssemblyConfig, ContextChunk
+from rageval.models.contracts import RerankResult
 
 _WORD_RE = re.compile(r"[A-Za-z0-9]+")
 _SOURCE_METADATA_KEYS = (

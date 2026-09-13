@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import json
 
 import httpx
@@ -215,7 +214,7 @@ async def test_provider_timeout_and_provider_error_are_typed_generation_failures
     context = [_reranked("chunk-6001", "Evidence.", 1)]
     timeout_engine = GroundedGenerationEngine(
         provider=DeterministicFakeGenerationProvider(
-            scripted_responses=[asyncio.TimeoutError("slow")]
+            scripted_responses=[TimeoutError("slow")]
         )
     )
     with pytest.raises(GenerationError, match="timed out"):

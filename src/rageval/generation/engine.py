@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import time
 from collections.abc import Sequence
@@ -72,7 +71,9 @@ def _payload_errors(
         if payload.citations:
             errors.append("insufficient-context responses must not contain citations")
         if not _is_explicit_refusal(payload.answer):
-            errors.append("insufficient-context response must explicitly say context/evidence is insufficient")
+            errors.append(
+                "insufficient-context response must explicitly say context/evidence is insufficient"
+            )
     else:
         if require_citations and not payload.citations:
             errors.append("supported answers require at least one citation")
@@ -107,7 +108,7 @@ class GroundedGenerationEngine:
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
             )
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             raise GenerationError("generation provider timed out") from exc
         except ProviderError as exc:
             raise GenerationError(f"generation provider failed: {exc}") from exc
@@ -178,7 +179,9 @@ class GroundedGenerationEngine:
                     require_citations=self.config.require_citations,
                 )
                 if not validation_errors:
-                    cited_ids = list(dict.fromkeys(citation.chunk_id for citation in payload.citations))
+                    cited_ids = list(
+                        dict.fromkeys(citation.chunk_id for citation in payload.citations)
+                    )
                     latency_ms = (time.perf_counter() - start) * 1000.0
                     answer = GroundedAnswer(
                         question=question,

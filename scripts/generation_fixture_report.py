@@ -121,7 +121,9 @@ async def _report() -> dict[str, object]:
         if answerable.answer.insufficient_context:
             raise AssertionError("answerable fixture unexpectedly refused")
         if not cited_ids or not cited_ids.issubset(allowed_ids):
-            raise AssertionError("answerable fixture citations are not traceable to supplied context")
+            raise AssertionError(
+                "answerable fixture citations are not traceable to supplied context"
+            )
         if not refused.answer.insufficient_context:
             raise AssertionError("unanswerable fixture did not explicitly refuse")
         if refused.answer.citations or refused.answer.cited_chunk_ids:

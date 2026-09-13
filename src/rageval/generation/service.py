@@ -56,7 +56,9 @@ class GroundedGenerationService:
                 citations=[],
                 cited_chunk_ids=[],
                 insufficient_context=True,
-                refusal_reason="retrieval router chose no retrieval; no grounded answer was generated",
+                refusal_reason=(
+                    "retrieval router chose no retrieval; no grounded answer was generated"
+                ),
                 provider="none",
                 model="none",
                 input_tokens=0,
