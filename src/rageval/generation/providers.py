@@ -182,11 +182,11 @@ class OpenAIGenerationProvider:
             except (httpx.TimeoutException, httpx.NetworkError) as exc:
                 last_error = exc
                 if attempt + 1 >= self.max_attempts:
-                    message = (
+                    error_message = (
                         f"OpenAI generation request failed after {self.max_attempts} "
                         f"attempts: {exc}"
                     )
-                    raise ProviderError(message) from exc
+                    raise ProviderError(error_message) from exc
                 await self._backoff(attempt)
             except httpx.HTTPError as exc:
                 raise ProviderError(f"OpenAI generation request failed: {exc}") from exc
