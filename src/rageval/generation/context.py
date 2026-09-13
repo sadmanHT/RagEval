@@ -177,9 +177,7 @@ class ContextAssembler:
                 accepted.append(truncated)
             else:
                 omitted_ids.append(result.retrieval.chunk.chunk_id)
-            omitted_ids.extend(
-                later.retrieval.chunk.chunk_id for later in unique[index + 1 :]
-            )
+            omitted_ids.extend(later.retrieval.chunk.chunk_id for later in unique[index + 1 :])
             break
 
         rendered = _SEPARATOR.join(_render_block(chunk) for chunk in accepted)

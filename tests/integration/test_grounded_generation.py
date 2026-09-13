@@ -100,9 +100,7 @@ async def test_real_retrieval_service_to_grounded_answer_and_refusal() -> None:
         )
         engine = GroundedGenerationEngine(
             provider=generation_provider,
-            assembler=ContextAssembler(
-                config=ContextAssemblyConfig(max_context_tokens=600)
-            ),
+            assembler=ContextAssembler(config=ContextAssemblyConfig(max_context_tokens=600)),
         )
         service = GroundedGenerationService(
             retrieval_service=retrieval,

@@ -16,7 +16,7 @@ from rageval.generation.models import LLMProviderResponse
 _QUESTION_RE = re.compile(r"QUESTION:\n(.*?)\n\nALLOWED_CHUNK_IDS:", re.DOTALL)
 _CONTEXT_RE = re.compile(
     r'\[CONTEXT_CHUNK id="([^"]+)"[^\]]*\]\nSOURCE_METADATA:'
-    r'.*?\nCONTENT:\n(.*?)\n\[/CONTEXT_CHUNK\]',
+    r".*?\nCONTENT:\n(.*?)\n\[/CONTEXT_CHUNK\]",
     re.DOTALL,
 )
 

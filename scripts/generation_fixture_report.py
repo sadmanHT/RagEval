@@ -102,9 +102,7 @@ async def _report() -> dict[str, object]:
         )
         engine = GroundedGenerationEngine(
             provider=fake_generation,
-            assembler=ContextAssembler(
-                config=ContextAssemblyConfig(max_context_tokens=600)
-            ),
+            assembler=ContextAssembler(config=ContextAssemblyConfig(max_context_tokens=600)),
         )
         service = GroundedGenerationService(
             retrieval_service=retrieval,
