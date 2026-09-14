@@ -128,10 +128,13 @@ async def test_evaluation_workers_enforce_configured_concurrency() -> None:
         jobs = [await manager.submit(EvaluationRunRequest()) for _ in range(3)]
         for _ in range(100):
             statuses = [await manager.status(job.job_id) for job in jobs]
-            if all(status is not None and status.status.value == "succeeded" for status in statuses):
+            all_succeeded = all(
+                status is not None and status.status.value == "succeeded" for status in statuses
+            )
+            if all_succeeded:
                 break
             await asyncio.sleep(0.01)
-        assert all(status is not None and status.status.value == "succeeded" for status in statuses)
+        assert all_succeeded
         assert executor.max_active == 1
     finally:
         await manager.stop()
