@@ -94,6 +94,12 @@ class _RecordingExecutor:
             self.active -= 1
 
 
+class _SensitiveFailureExecutor:
+    async def run(self, request: EvaluationRunRequest) -> ComparativeEvaluationReport:
+        del request
+        raise RuntimeError("evaluation token eval-secret-must-not-leak")
+
+
 def test_readiness_reports_configured_redis_degradation() -> None:
     app = create_app(
         dependencies=ServingDependencies(
@@ -137,5 +143,30 @@ async def test_evaluation_workers_enforce_configured_concurrency() -> None:
             await asyncio.sleep(0.01)
         assert all_succeeded
         assert executor.max_active == 1
+    finally:
+        await manager.stop()
+
+
+async def test_evaluation_worker_failure_is_sanitized(caplog) -> None:
+    manager = EvaluationJobManager(
+        executor=_SensitiveFailureExecutor(),
+        max_concurrency=1,
+        max_queue_size=1,
+    )
+    await manager.start()
+    try:
+        job = await manager.submit(EvaluationRunRequest())
+        status = await manager.status(job.job_id)
+        for _ in range(100):
+            if status is not None and status.status.value == "failed":
+                break
+            await asyncio.sleep(0.01)
+            status = await manager.status(job.job_id)
+
+        assert status is not None
+        assert status.status.value == "failed"
+        assert status.error_code == "evaluation_failed"
+        assert "eval-secret-must-not-leak" not in caplog.text
+        assert "RuntimeError" in caplog.text
     finally:
         await manager.stop()
