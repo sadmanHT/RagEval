@@ -4,7 +4,7 @@ RAG-Eval is a production-oriented Retrieval-Augmented Generation system whose pr
 
 ## Current status
 
-Phases 1–10 are merged and verified on `main`. The pipeline now covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking, reproducible dense Qdrant retrieval, deterministic BM25/BM25+ sparse retrieval, RRF hybrid fusion, a reranked retrieval-service layer with bounded multi-hop over the same canonical chunk identities, and provider-abstracted grounded generation with deterministic context assembly, citation validation/repair, explicit insufficiency refusal, prompt-injection separation, and observable retrieval routing. Phase 11 — evaluation dataset, metrics, and judge contracts — is next.
+Phases 1–11 are merged and verified on `main`. The pipeline now covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking, reproducible dense Qdrant retrieval, deterministic BM25/BM25+ sparse retrieval, RRF hybrid fusion, a reranked retrieval-service layer with bounded multi-hop over the same canonical chunk identities, provider-abstracted grounded generation with deterministic context assembly/citation validation/refusal, and leakage-aware evaluation dataset/metric/judge contracts. Phase 12 — evaluation runner, ablation, and failure analysis — is next.
 
 Phase 6 dense retrieval consumes canonical Phase 5 chunks, embeds them behind a replaceable provider boundary, preserves stable chunk/configuration/provenance identity in reconstructable Qdrant payloads, and returns the canonical `RetrievalResult` contract. The deterministic/local acceptance path uses a local hashed embedding adapter for mechanics and real-Qdrant integration only; live OpenAI embedding validation remains unrun without credentials.
 
@@ -20,7 +20,11 @@ Phase 10 consumes Phase 9 `final_context` directly. `ContextAssembler` determini
 
 The credential-free generation acceptance path uses `DeterministicFakeGenerationProvider`. The hosted reference adapter targets OpenAI and implements bounded timeout/retry/backoff plus strict structured response/usage parsing; its HTTP behavior is covered with deterministic mocked 429 and timeout tests. No live OpenAI generation is claimed without credentials. `AlwaysRetrieveRouter` is the default; an opt-in conservative Self-RAG-style router exposes its decision, and any no-retrieval route currently refuses rather than emitting an ungrounded answer under the same grounded-answer guarantee.
 
-The small committed fixtures verify mechanics, provenance, deterministic ordering, retry/error handling, top-5 orchestration, two-hop recovery, context budgeting, citation traceability, bounded repair, prompt-boundary behavior, and explicit refusal rather than production retrieval or generation quality. No neural-reranking quality, hosted-model answer quality, target-corpus retrieval improvement, faithfulness score, hallucination rate, answer-relevancy score, or production latency/cost benchmark is claimed from these fixtures.
+Phase 11 finalizes held-out evaluation-example governance, strict JSONL/review tooling, corpus-fingerprint and held-out document leakage checks, canonical chunk-ID context precision/recall, structured provider-abstracted judge contracts, deterministic rule/scripted judges, claim-level faithfulness, answer relevancy, and response-level hallucination defined strictly as `faithfulness < 0.8`. Evaluation runs carry deterministic dataset/config/run fingerprints, and hallucination output persists the flagged count, total count, threshold, and arithmetically validated `count / N` rate.
+
+The target roughly 200-question evaluation set is not present and was not fabricated. Phase 11 deterministic acceptance uses three reviewed synthetic financial/legal/research records. The lexical rule judge and optional injected-scorer RAGAS adapter validate measurement mechanics, schema, and arithmetic only; no live LLM judge or actual RAGAS-backed semantic result is claimed.
+
+The small committed fixtures verify mechanics, provenance, deterministic ordering, retry/error handling, top-5 orchestration, two-hop recovery, context budgeting, citation traceability, bounded repair, prompt-boundary behavior, explicit refusal, metric arithmetic, judge schema auditing, and run fingerprinting rather than production retrieval/generation/evaluation quality. No neural-reranking quality, hosted-model answer quality, target-corpus retrieval improvement, representative faithfulness/hallucination/answer-relevancy score, or production latency/cost benchmark is claimed from these fixtures.
 
 ## Quick start
 
@@ -37,6 +41,7 @@ make sparse-report
 make hybrid-report
 make retrieval-report
 make generation-report
+make evaluation-report
 make smoke
 ```
 
@@ -92,13 +97,16 @@ python scripts/sparse_fixture_report.py
 python scripts/hybrid_fixture_report.py
 python scripts/retrieval_service_fixture_report.py
 python scripts/generation_fixture_report.py
+python scripts/evaluation_fixture_report.py
 ```
 
-The dense fixture report uses real local Qdrant; the sparse report validates deterministic BM25+ identity and exact-term retrieval; the hybrid report validates concurrent RRF mechanics and bounded expansion; the retrieval-service report validates top-5 reranking plus bounded two-hop recovery; and the generation report validates retrieval-to-context-to-grounded-answer citation traceability plus explicit unsupported-question refusal. All use committed fixtures and emit machine-readable JSON.
+The dense fixture report uses real local Qdrant; the sparse report validates deterministic BM25+ identity and exact-term retrieval; the hybrid report validates concurrent RRF mechanics and bounded expansion; the retrieval-service report validates top-5 reranking plus bounded two-hop recovery; the generation report validates retrieval-to-context-to-grounded-answer citation traceability plus explicit unsupported-question refusal; and the evaluation report validates deterministic metric arithmetic, hallucination count/rate consistency, structured judge/version metadata, and dataset/config/run fingerprints. All use committed fixtures and emit machine-readable JSON.
 
 The Phase 9 fixture proves deterministic reranking can move a canonical candidate from pre-rerank rank 6 to post-rerank rank 1 while preserving the original retrieval/provenance object. Its multi-hop fixture proves a bounded second hop can recover a non-adjacent legal chunk while retaining both hop traces. These are mechanics fixtures, not retrieval-quality benchmarks.
 
 The Phase 10 fixture builds 6 canonical chunks from 4 committed source documents. Its answerable path cites a canonical chunk ID that is present in the exact supplied assembled context, and its intentionally unanswerable Europa question returns `insufficient_context=true` with zero citations. This proves structured grounding/refusal mechanics only; it does not establish semantic faithfulness or hosted-model quality.
+
+The Phase 11 fixture evaluates 3 reviewed synthetic records. It computes one flagged response out of three at the strict `faithfulness < 0.8` threshold and persists the rate as `1 / 3`; these numbers are mechanics/arithmetic evidence only and are not a production hallucination-rate estimate.
 
 The corpus layout is `<root>/<development|evaluation>/<financial|legal|research>/<file>`.
 Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
@@ -125,8 +133,10 @@ Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
 - Insufficient-context cases must refuse explicitly rather than silently filling gaps with unsupported external knowledge.
 - Repair of malformed structured output/citations is bounded and observable; exhaustion fails closed.
 - Self-RAG-style routing is observable and retrieval remains the default for domain questions; no-retrieval routes must not silently claim the same faithfulness guarantee.
-- Deterministic/local providers and tiny fixtures validate mechanics, not learned semantic quality, hosted-model answer quality, or production retrieval/generation quality.
-- No chunking, retrieval, routing, or generation strategy is considered preferable without representative evaluation evidence.
+- Evaluation metric/judge/run contracts must remain versioned and fingerprinted; headline scores must be derived from actual per-example records.
+- Hallucination-rate output must retain its numerator and denominator; an independently typed percentage is not accepted as evidence.
+- Deterministic/local providers and tiny fixtures validate mechanics, not learned semantic quality, hosted-model answer quality, or production retrieval/generation/evaluation quality.
+- No chunking, retrieval, routing, generation, or evaluation strategy is considered preferable without representative evaluation evidence.
 - Every phase must pass its own tests and the cumulative regression suite before completion.
 
 See `docs/implementation-state.md`, `docs/architecture-decisions.md`, `docs/phases/`, and `docs/plans/`.
