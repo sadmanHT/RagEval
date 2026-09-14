@@ -176,9 +176,7 @@ def build_query_trace(
                     dense_rank=_optional_int(metadata.get("dense_rank")),
                     sparse_rank=_optional_int(metadata.get("sparse_rank")),
                     rrf_score=item.retrieval.score,
-                    dense_rrf_contribution=_optional_float(
-                        metadata.get("dense_rrf_contribution")
-                    ),
+                    dense_rrf_contribution=_optional_float(metadata.get("dense_rrf_contribution")),
                     sparse_rrf_contribution=_optional_float(
                         metadata.get("sparse_rrf_contribution")
                     ),
