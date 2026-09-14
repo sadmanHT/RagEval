@@ -79,10 +79,8 @@ def classify_failure(
     if not answer.insufficient_context and (not cited_ids or missing_citations):
         detail = "non-refusal answer has no citations"
         if missing_citations:
-            detail = (
-                "citations reference chunks outside supplied context: "
-                f"{sorted(missing_citations)}"
-            )
+            missing = sorted(missing_citations)
+            detail = f"citations reference chunks outside supplied context: {missing}"
         add(FailureCategory.CITATION_FAILURE, detail)
 
     if evaluation_record.hallucinated:
