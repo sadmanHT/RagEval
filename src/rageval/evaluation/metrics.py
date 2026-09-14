@@ -49,11 +49,8 @@ def extract_claims(answer: GroundedAnswer) -> tuple[str, ...]:
 
     if answer.insufficient_context:
         return ()
-    citation_claims = (
-        citation.claim.strip()
-        for citation in answer.citations
-        if citation.claim.strip()
-    )
+    normalized_claims = (citation.claim.strip() for citation in answer.citations)
+    citation_claims = (claim for claim in normalized_claims if claim)
     cited_claims = tuple(dict.fromkeys(citation_claims))
     if cited_claims:
         return cited_claims
