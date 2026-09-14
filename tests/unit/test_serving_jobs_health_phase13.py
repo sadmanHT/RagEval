@@ -62,6 +62,7 @@ def _report() -> ComparativeEvaluationReport:
         dataset_fingerprint="a" * 64,
         config_fingerprint="e" * 64,
         evaluation=evaluation,
+        metric_slices=(),
     )
     return ComparativeEvaluationReport(
         dataset_fingerprint="a" * 64,
