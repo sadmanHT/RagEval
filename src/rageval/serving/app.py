@@ -99,6 +99,7 @@ class RequestGuardMiddleware(BaseHTTPMiddleware):
             else uuid.uuid4().hex
         )
         request.state.request_id = request_id
+        response: Response
 
         for name in _SECURITY_HEADER_NAMES:
             value = request.headers.get(name)
