@@ -140,13 +140,9 @@ class EvaluationJobManager:
             raise
         except Exception as exc:
             logger.error(
-                "evaluation job failed",
-                extra={
-                    "context": {
-                        "job_id": job_id,
-                        "exception_type": type(exc).__name__,
-                    }
-                },
+                "evaluation job failed (%s)",
+                type(exc).__name__,
+                extra={"context": {"job_id": job_id}},
             )
             async with self._lock:
                 record = self.records[job_id]
