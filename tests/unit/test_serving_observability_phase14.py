@@ -124,7 +124,11 @@ def test_metrics_trace_security_headers_and_exact_cors() -> None:
     query_records = [record for record in sink.records if record.kind == "query"]
     assert len(query_records) == 2
     assert all(record.query is not None for record in query_records)
-    assert all(record.query.query_text is None for record in query_records if record.query is not None)
+    assert all(
+        record.query.query_text is None
+        for record in query_records
+        if record.query is not None
+    )
 
 
 def test_rate_limit_header_abuse_default_cors_and_degraded_dependency_metrics() -> None:
@@ -169,7 +173,10 @@ def test_rate_limit_header_abuse_default_cors_and_degraded_dependency_metrics() 
         metrics = client.get("/metrics")
     assert readiness.status_code == 503
     assert 'rageval_dependency_ready{component="qdrant"} 0.0' in metrics.text
-    assert 'rageval_http_requests_total{method="GET",route="/health/ready",status_class="5xx"}' in metrics.text
+    readiness_metric = (
+        'rageval_http_requests_total{method="GET",route="/health/ready",status_class="5xx"}'
+    )
+    assert readiness_metric in metrics.text
 
 
 def test_wildcard_cors_is_rejected() -> None:
