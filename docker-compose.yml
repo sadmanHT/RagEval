@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:7.2-alpine
+    image: redis:7.2.5-alpine
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
@@ -22,6 +22,83 @@ services:
       retries: 20
     restart: unless-stopped
 
+  api:
+    build:
+      context: .
+      target: runtime
+    environment:
+      RAGEVAL_APP_ENV: development
+      RAGEVAL_QDRANT_URL: http://qdrant:6333
+      RAGEVAL_REDIS_URL: redis://redis:6379/0
+      RAGEVAL_SERVING_API_KEY: ${RAGEVAL_SERVING_API_KEY:-local-compose-change-me}
+      RAGEVAL_SERVING_CORS_ORIGINS: ${RAGEVAL_SERVING_CORS_ORIGINS:-[]}
+      RAGEVAL_TRACING_PROVIDER: ${RAGEVAL_TRACING_PROVIDER:-disabled}
+      RAGEVAL_OBSERVABILITY_INCLUDE_QUERY_TEXT: ${RAGEVAL_OBSERVABILITY_INCLUDE_QUERY_TEXT:-false}
+      RAGEVAL_LANGFUSE_PUBLIC_KEY: ${RAGEVAL_LANGFUSE_PUBLIC_KEY:-}
+      RAGEVAL_LANGFUSE_SECRET_KEY: ${RAGEVAL_LANGFUSE_SECRET_KEY:-}
+      RAGEVAL_LANGFUSE_HOST: ${RAGEVAL_LANGFUSE_HOST:-https://cloud.langfuse.com}
+    ports:
+      - "8000:8000"
+    depends_on:
+      qdrant:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-local-grafana-change-me}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./ops/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:0.11.10
+    profiles: ["local-model"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
 volumes:
   qdrant_data:
   redis_data:
+  prometheus_data:
+  grafana_data:
+  ollama_data:
