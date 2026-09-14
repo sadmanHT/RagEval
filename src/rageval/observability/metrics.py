@@ -170,9 +170,7 @@ class PrometheusMetrics:
 
     def observe_dependency(self, component: str, *, healthy: bool) -> None:
         component_label = (
-            component
-            if component in {"qdrant", "redis", "generation_provider"}
-            else "other"
+            component if component in {"qdrant", "redis", "generation_provider"} else "other"
         )
         self.dependency_ready.labels(component_label).set(1.0 if healthy else 0.0)
 
