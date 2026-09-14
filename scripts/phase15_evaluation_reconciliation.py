@@ -9,7 +9,6 @@ import json
 from pathlib import Path
 
 import evaluation_ablation_fixture_report as phase12
-
 from rageval.evaluation import (
     AsyncEvaluationRunner,
     DeterministicRuleJudge,
