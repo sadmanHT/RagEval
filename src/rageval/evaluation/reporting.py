@@ -85,14 +85,8 @@ def render_html(report: ComparativeEvaluationReport) -> str:
         "<title>Comparative Evaluation Report</title></head><body>",
         "<h1>Comparative Evaluation Report</h1>",
         f"<p>Evidence label: <code>{html.escape(report.evidence_label)}</code></p>",
-        (
-            "<p>Dataset fingerprint: "
-            f"<code>{html.escape(report.dataset_fingerprint)}</code></p>"
-        ),
-        (
-            "<p>Matrix fingerprint: "
-            f"<code>{html.escape(report.matrix_fingerprint)}</code></p>"
-        ),
+        f"<p>Dataset fingerprint: <code>{html.escape(report.dataset_fingerprint)}</code></p>",
+        f"<p>Matrix fingerprint: <code>{html.escape(report.matrix_fingerprint)}</code></p>",
         (
             "<p><strong>Interpretation:</strong> metric rows include sample counts; "
             "tiny fixture differences are not representative quality evidence.</p>"
