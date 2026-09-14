@@ -38,12 +38,21 @@ class Settings(BaseSettings):
     serving_api_key: SecretStr | None = None
     serving_request_timeout_seconds: float = Field(default=30.0, gt=0.0, le=300.0)
     serving_max_request_bytes: int = Field(default=65_536, ge=1_024, le=10_000_000)
+    serving_max_security_header_bytes: int = Field(default=4_096, ge=128, le=65_536)
     serving_query_concurrency: int = Field(default=16, ge=1, le=256)
     serving_eval_job_concurrency: int = Field(default=1, ge=1, le=16)
     serving_eval_queue_size: int = Field(default=8, ge=1, le=1_000)
     serving_cache_ttl_seconds: int = Field(default=300, ge=1, le=86_400)
     serving_expose_retrieval_diagnostics: bool = False
     serving_stream_chunk_chars: int = Field(default=256, ge=1, le=8_192)
+    serving_rate_limit_requests: int = Field(default=120, ge=1, le=100_000)
+    serving_rate_limit_window_seconds: float = Field(default=60.0, gt=0.0, le=3_600.0)
+    serving_cors_origins: tuple[str, ...] = ()
+    serving_cors_allow_credentials: bool = False
+
+    observability_include_query_text: bool = False
+    drift_min_samples: int = Field(default=30, ge=1, le=1_000_000)
+    drift_relative_shift_threshold: float = Field(default=0.25, ge=0.0, le=100.0)
 
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
@@ -80,4 +89,8 @@ class Settings(BaseSettings):
             raise ValueError(f"Missing required provider credentials: {keys}")
         if self.embedding_dimensions < 1 or self.local_embedding_dimensions < 4:
             raise ValueError("embedding dimensions must be positive and local dimensions >= 4")
+        if any(origin == "*" for origin in self.serving_cors_origins):
+            raise ValueError("wildcard CORS origins are not permitted")
+        if self.serving_cors_allow_credentials and not self.serving_cors_origins:
+            raise ValueError("CORS credentials require at least one explicit origin")
         return self
