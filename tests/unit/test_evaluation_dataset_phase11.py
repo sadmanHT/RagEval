@@ -93,9 +93,7 @@ def test_dataset_jsonl_round_trip_is_stable(tmp_path: Path) -> None:
         "eval_phase11_0001",
         "eval_phase11_0002",
     ]
-    assert fingerprint_evaluation_records(loaded) == fingerprint_evaluation_records(
-        [second, first]
-    )
+    assert fingerprint_evaluation_records(loaded) == fingerprint_evaluation_records([second, first])
 
 
 def test_duplicate_example_ids_are_rejected() -> None:
