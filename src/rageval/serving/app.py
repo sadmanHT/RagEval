@@ -415,6 +415,21 @@ async def _stream_query(
             data={"code": f"http_{exc.status_code}", "message": "streaming query failed"},
         )
         yield (error.model_dump_json() + "\n").encode("utf-8")
+    except Exception as exc:
+        logger.error(
+            "streaming query failed",
+            extra={
+                "context": {
+                    "request_id": request_id,
+                    "exception_type": type(exc).__name__,
+                }
+            },
+        )
+        error = StreamEvent(
+            event="error",
+            data={"code": "internal_error", "message": "streaming query failed"},
+        )
+        yield (error.model_dump_json() + "\n").encode("utf-8")
     finally:
         if not task.done():
             task.cancel()
