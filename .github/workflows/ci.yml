@@ -120,6 +120,7 @@ jobs:
             rageval-test:ci pytest -q
       - name: Real full-system validation inside test container
         run: |
+          GITHUB_SHA="${{ github.event.pull_request.head.sha || github.sha }}" \
           docker run --rm --network host \
             -e GITHUB_SHA \
             -e RAGEVAL_QDRANT_URL=http://127.0.0.1:6333 \
@@ -244,6 +245,7 @@ jobs:
       - name: Full-system validation and measured benchmark
         run: |
           mkdir -p artifacts/phase15
+          GITHUB_SHA="${{ github.event.pull_request.head.sha || github.sha }}" \
           python scripts/full_system_validation.py \
             --artifact-dir artifacts/phase15/full-system \
             --require-ocr \
