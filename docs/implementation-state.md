@@ -92,12 +92,24 @@ The Phase 10 fixture builds **6 canonical chunks from 4 committed source documen
 
 These are mechanics/traceability results, not hosted-model quality or semantic-faithfulness results. Live OpenAI generation was not run without credentials. Citation validation currently proves canonical ID membership in supplied context, not claim entailment. Context token accounting is deterministic mechanics accounting rather than exact hosted-model tokenization. Detailed evidence and limitations are in `docs/phases/phase-10-report.md`.
 
+### Phase 11 — Evaluation dataset, metric implementations, and judge contracts
+
+Merged to `main` as PR #11 at commit `5cdfcaa409545cc448a8a3d99ecfd066c0239a8a` from final validated PR head `e3e2bd1388961fe8c5ba83c57a7be6f8066f60a8`. Final PR-head GitHub Actions run `34819678161` and independent merge-triggered `main` run `34819832613` both passed all three jobs: quality, integration with every inherited evidence gate plus the Phase 11 evaluation-metrics fixture and full regression, and dedicated installed-Tesseract OCR.
+
+Phase 11 provides leakage-aware evaluation dataset contracts and JSONL/review tooling; deterministic dataset/config/run fingerprints; canonical chunk-ID context precision/recall; structured provider-abstracted judge requests/responses with concise rationale/evidence fields and explicit prompt/rubric/provider/model versions; deterministic rule/scripted judges; claim-level faithfulness and answer relevancy; response-level hallucination defined strictly as `faithfulness < 0.8`; count/denominator-validated hallucination aggregation; and an optional stable RAGAS adapter boundary around an injected scorer.
+
+Accepted implementation evidence: Ruff passed; formatter reported **149 files already formatted**; strict mypy passed on **71 source files**; unit suite **147 passed**; ordinary integration **29 passed, 1 skipped**; full cumulative suite **176 passed, 1 skipped**; dedicated installed Tesseract 5.3.4 OCR **1 passed**.
+
+The Phase 11 acceptance fixture contains **3 reviewed synthetic examples**, not the target roughly 200-question held-out set. Its dataset fingerprint is `5dad39bffb7acd7ac15414a10b9a654461a4ba0ff4642f7c66281733fd9c4cc0`, configuration fingerprint is `89fbf59dba96baec81e6437d22b50451fcb697327adc4249f854173dbf698d38`, and run fingerprint is `487bfc426c609b97c65f660626d75b9672281b89deee94be361a98017c69e858`. The deterministic fixture produced one flagged response out of three at the strict `< 0.8` threshold, so the persisted hallucination rate is computed as `1 / 3`, not copied from documentation.
+
+These are mechanics/arithmetic results, not representative semantic-quality results. No target 200-question dataset was supplied or fabricated, no live LLM judge was run, and no actual RAGAS package-backed evaluation result is claimed. Detailed evidence and limitations are in `docs/phases/phase-11-report.md`.
+
 ## Next phase
 
-### Phase 11 — Evaluation dataset, metrics, and judge contracts
+### Phase 12 — Evaluation runner, ablation, and failure analysis
 
-Phase 11 should define the held-out evaluation dataset and metric/judge contracts over the stable retrieval and grounded-generation outputs. It must keep evaluation examples leakage-safe, use canonical chunk identity/provenance for context metrics, distinguish citation traceability from semantic faithfulness/entailment, represent refusals explicitly, and keep any hosted judge behind a deterministic-testable structured provider interface. No target roughly 200-question dataset, metric score, or provider result should be fabricated if the actual data or credentials are unavailable.
+Phase 12 should consume the stable Phase 11 dataset/metric/judge/run contracts to run reproducible configuration-specific evaluations, persist traceable artifacts, execute controlled retrieval/generation ablations, slice results by domain/tags/table cases, and produce failure analysis without mixing dataset or metric versions. Representative benchmark claims remain blocked until the real reviewed evaluation set and any required provider credentials are supplied.
 
 ## Later phases
 
-Evaluation running/ablation/failure analysis, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
+Serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
