@@ -106,6 +106,18 @@ class RecordingQueryService:
             self.active -= 1
 
 
+class SensitiveFailureQueryService(RecordingQueryService):
+    async def answer(
+        self,
+        question: str,
+        *,
+        filters: HybridSearchFilter | None = None,
+        top_k: int | None = None,
+    ) -> GroundedGenerationResponse:
+        del question, filters, top_k
+        raise RuntimeError("provider failed with token provider-secret-must-not-leak")
+
+
 class FixtureEvaluationExecutor:
     async def run(self, request: EvaluationRunRequest) -> ComparativeEvaluationReport:
         del request
@@ -280,3 +292,19 @@ def test_request_size_and_secret_regression(caplog) -> None:
     assert invalid.status_code == 403
     assert "do-not-leak-this-secret" not in invalid.text
     assert "do-not-leak-this-secret" not in caplog.text
+
+
+def test_unhandled_errors_do_not_log_secret_bearing_exception_text(caplog) -> None:
+    app = _app(SensitiveFailureQueryService())
+    with TestClient(app, raise_server_exceptions=False) as client:
+        response = client.post(
+            "/query",
+            headers={"X-API-Key": API_KEY},
+            json={"question": "trigger provider failure", "options": {"use_cache": False}},
+        )
+
+    assert response.status_code == 500
+    assert response.json()["code"] == "internal_error"
+    assert "provider-secret-must-not-leak" not in response.text
+    assert "provider-secret-must-not-leak" not in caplog.text
+    assert "RuntimeError" in caplog.text
