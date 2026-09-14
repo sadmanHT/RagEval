@@ -15,10 +15,7 @@ from rageval.evaluation import (
 from rageval.models import Citation, GroundedAnswer
 
 FIXTURE_PATH = (
-    Path(__file__).resolve().parent.parent
-    / "fixtures"
-    / "evaluation"
-    / "phase11_records.jsonl"
+    Path(__file__).resolve().parent.parent / "fixtures" / "evaluation" / "phase11_records.jsonl"
 )
 
 
@@ -50,9 +47,7 @@ def _observations(
             ),
             retrieved_chunk_ids=("chk_fin_fixture_01", "chk_distractor_01"),
             context_by_chunk_id={
-                "chk_fin_fixture_01": (
-                    "Example Corp reported revenue of $125 million in Q3 2026."
-                ),
+                "chk_fin_fixture_01": ("Example Corp reported revenue of $125 million in Q3 2026."),
                 "chk_distractor_01": "Unrelated fixture text.",
             },
         ),
