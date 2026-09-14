@@ -18,6 +18,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
+from starlette.types import ASGIApp
 
 from rageval.core.settings import Settings
 from rageval.generation.models import GroundedGenerationResponse
@@ -66,7 +67,7 @@ class ServingDependencies:
 class RequestGuardMiddleware(BaseHTTPMiddleware):
     """Assign request IDs, cap request bodies, and log metadata without request contents."""
 
-    def __init__(self, app: FastAPI, *, max_request_bytes: int) -> None:
+    def __init__(self, app: ASGIApp, *, max_request_bytes: int) -> None:
         super().__init__(app)
         self.max_request_bytes = max_request_bytes
 
