@@ -1,6 +1,6 @@
 .PHONY: install lint format format-check typecheck unit integration compose-up compose-down verify
 .PHONY: dense-report sparse-report hybrid-report retrieval-report generation-report evaluation-report
-.PHONY: evaluation-ablation-report test smoke ci
+.PHONY: evaluation-ablation-report serving-report test smoke ci
 
 install:
 	python -m pip install -e '.[dev]'
@@ -51,6 +51,9 @@ evaluation-report:
 evaluation-ablation-report:
 	python scripts/evaluation_ablation_fixture_report.py
 
+serving-report:
+	python scripts/serving_fixture_report.py
+
 smoke:
 	python -m rageval.smoke
 
@@ -60,4 +63,4 @@ test:
 verify: lint format-check typecheck unit
 
 ci: verify integration dense-report sparse-report hybrid-report retrieval-report generation-report \
-	evaluation-report evaluation-ablation-report smoke test
+	evaluation-report evaluation-ablation-report serving-report smoke test
