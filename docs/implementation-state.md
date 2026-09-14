@@ -104,12 +104,16 @@ The Phase 11 acceptance fixture contains **3 reviewed synthetic examples**, not 
 
 These are mechanics/arithmetic results, not representative semantic-quality results. No target 200-question dataset was supplied or fabricated, no live LLM judge was run, and no actual RAGAS package-backed evaluation result is claimed. Detailed evidence and limitations are in `docs/phases/phase-11-report.md`.
 
-## Next phase
+### Phase 12 — Evaluation runner, ablations, experiment tracking, regression, and failure analysis
 
-### Phase 12 — Evaluation runner, ablation, and failure analysis
+Merged to `main` as PR #12 at commit `9bcb40a183ca3afe380f5cb684671a9e29b3f852` from final validated PR head `469a935581252607ea85e7aec1cfddc5d1bb14ad`. Final PR-head run `34825381598` and independent merge-triggered `main` run `34825477749` both passed all three jobs: quality, integration with every inherited evidence gate plus Phase 12 comparative-ablation evidence and full regression, and dedicated installed-Tesseract OCR.
 
-Phase 12 should consume the stable Phase 11 dataset/metric/judge/run contracts to run reproducible configuration-specific evaluations, persist traceable artifacts, execute controlled retrieval/generation ablations, slice results by domain/tags/table cases, and produce failure analysis without mixing dataset or metric versions. Representative benchmark claims remain blocked until the real reviewed evaluation set and any required provider credentials are supplied.
+Phase 12 provides bounded-concurrency async evaluation with retry/backoff and fingerprint-validated per-example checkpoint/resume; explicit dense-only, hybrid-RRF, hybrid-rerank, fixed/semantic/table-aware chunking, query-expansion, and multi-hop configuration matrices; deterministic configuration/matrix/run identities; overall and financial/legal/research metric slices with sample counts; the required eight-category failure taxonomy; explicit PR-fast blocking versus nightly/full alert semantics; reuse of the existing experiment-tracker abstraction with local JSON plus optional W&B; and JSON/Markdown/HTML comparative reports generated from the same immutable report model.
 
-## Later phases
+Accepted implementation evidence: Ruff lint/format and strict mypy passed; unit suite **161 passed**; ordinary integration **30 passed, 1 skipped**; full cumulative suite **191 passed, 1 skipped**; dedicated installed Tesseract OCR passed. The Phase 12 fixture uses the same **3 reviewed synthetic records** under **5 distinct configurations** and is explicitly labeled `deterministic-fixture-ablation-mechanics-only`.
 
-Serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
+The target roughly 200-question held-out set and representative roughly 12,000-document corpus remain absent and were not fabricated. Therefore Phase 12 does **not** select a preferred chunk size, retrieval architecture, reranking policy, query-expansion policy, or multi-hop policy; no representative provider/quality/latency result is claimed. Detailed evidence and limitations are in `docs/phases/phase-12-report.md`.
+
+## Next work
+
+Serving/API integration, observability and scheduled evaluation, deployment hardening, and final release validation remain the next engineering areas. Representative benchmarking remains blocked until the real reviewed evaluation set, representative corpus/index, and any required live-provider credentials are supplied.
