@@ -138,8 +138,16 @@ class EvaluationJobManager:
             summary = _summarize_report(job_id, report, completed_at=completed_at)
         except asyncio.CancelledError:
             raise
-        except Exception:
-            logger.exception("evaluation job failed", extra={"context": {"job_id": job_id}})
+        except Exception as exc:
+            logger.error(
+                "evaluation job failed",
+                extra={
+                    "context": {
+                        "job_id": job_id,
+                        "exception_type": type(exc).__name__,
+                    }
+                },
+            )
             async with self._lock:
                 record = self.records[job_id]
                 record.status = EvaluationJobState.FAILED
