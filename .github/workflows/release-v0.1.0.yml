@@ -1,0 +1,62 @@
+name: Release v0.1.0
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-v0.1.0
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Skip when v0.1.0 already exists
+        id: existing
+        shell: bash
+        run: |
+          if gh release view v0.1.0 --repo "$REPO" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Require the validated SHA to remain current main
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          CURRENT_MAIN="$(gh api "repos/$REPO/branches/main" --jq '.commit.sha')"
+          test "$CURRENT_MAIN" = "$HEAD_SHA"
+
+      - name: Publish v0.1.0
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
+          # RAG-Eval v0.1.0
+
+          First evidence-backed deterministic release after Phases 1–15.
+
+          Acceptance includes the canonical ingestion/retrieval/rerank/grounded-generation/serving/evaluation/observability path, 15 Phase 15 deterministic/adversarial full-system scenarios, clean non-root container acceptance, installed-Tesseract OCR, dependency/secret scanning, and Qdrant outage plus recovery validation.
+
+          Evidence boundary: the representative roughly 12,000-document corpus and target roughly 200-question reviewed evaluation set are not supplied. Hosted-provider quality, production SLO/cost/load, statistically significant drift, and a production chunking winner are not claimed from the committed fixtures.
+
+          See `docs/phases/phase-15-report.md` and `docs/phases/phase-15-postmerge.md` for exact evidence and limitations.
+          EOF
+          gh release create v0.1.0 \
+            --repo "$REPO" \
+            --target "$HEAD_SHA" \
+            --title "RAG-Eval v0.1.0" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
