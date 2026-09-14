@@ -114,6 +114,16 @@ Accepted implementation evidence: Ruff lint/format and strict mypy passed; unit 
 
 The target roughly 200-question held-out set and representative roughly 12,000-document corpus remain absent and were not fabricated. Therefore Phase 12 does **not** select a preferred chunk size, retrieval architecture, reranking policy, query-expansion policy, or multi-hop policy; no representative provider/quality/latency result is claimed. Detailed evidence and limitations are in `docs/phases/phase-12-report.md`.
 
+### Phase 13 — FastAPI serving, authentication, caching, streaming, and evaluation jobs
+
+Merged to `main` as PR #13 at commit `e62653bcc3c8ea038c427a0845818bfc266b5aab` from final validated PR head `ef992b5bf45320119a863eae9cd0ad041ff9988b`. Final report-bearing PR-head run `34829244985` and independent merge-triggered `main` run `34829399381` both passed all three jobs: quality, integration with every inherited evidence gate plus Phase 13 serving evidence and full regression, and dedicated installed-Tesseract OCR.
+
+Phase 13 provides typed async FastAPI schemas/OpenAPI; authenticated `/query`, `/eval/run`, `/eval/jobs/{job_id}`, and `/eval/latest`; liveness/readiness endpoints; request IDs, body limits, timeouts, bounded query concurrency, and safe errors; request-scoped `top_k` through the canonical Phase 9–10 retrieval/generation path; correctness-scoped Redis caching keyed by request/filter/index/retrieval/generation/model/prompt identity; NDJSON transport streaming with final structured citations and disconnect cancellation; and a fixed-worker bounded evaluation queue. Generic request, streaming, and worker failures retain correlation plus exception class but do not log arbitrary downstream exception messages.
+
+Accepted implementation evidence: Ruff lint/format passed; strict mypy passed on **82 source files**; unit suite **173 passed**; ordinary integration **31 passed, 1 skipped**; full cumulative suite **204 passed, 1 skipped**; dedicated installed Tesseract OCR **1 passed**. The real-local serving fixture uses **4 committed source documents / 6 canonical chunks** behind Qdrant and Redis and confirms authenticated query, readiness, Redis cache hit, index-fingerprint invalidation, final streaming citations, and successful evaluation-job lifecycle. It is explicitly labeled `phase13-serving-fixture-mechanics-only`.
+
+The representative roughly 12,000-document corpus and roughly 200-question held-out evaluation set remain absent and were not fabricated. Live OpenAI embedding/generation, Cohere reranking, live LLM judge/RAGAS semantic evaluation, production load/SLO/cost benchmarking, durable distributed job execution, multi-tenancy, and global rate limiting are not claimed. Detailed evidence and limitations are in `docs/phases/phase-13-report.md`.
+
 ## Next work
 
-Serving/API integration, observability and scheduled evaluation, deployment hardening, and final release validation remain the next engineering areas. Representative benchmarking remains blocked until the real reviewed evaluation set, representative corpus/index, and any required live-provider credentials are supplied.
+Observability and scheduled evaluation, deployment hardening, dependency-maintenance cleanup, and final release validation remain the next engineering areas. Representative benchmarking remains blocked until the real reviewed evaluation set, representative corpus/index, and any required live-provider credentials are supplied.
