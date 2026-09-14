@@ -101,14 +101,16 @@ jobs:
             'import os; assert os.getuid() != 0, os.getuid(); print(f"runtime_uid={os.getuid()}")'
       - name: Start complete operational stack from clean volumes
         env:
-          RAGEVAL_SERVING_API_KEY: phase14-ci-local-key
+          RAGEVAL_SERVING_API_KEY: phase14-ci-local-key  # pragma: allowlist secret
         run: |
           docker compose down -v --remove-orphans
           docker compose up -d --build qdrant redis api prometheus grafana
       - name: Operational HTTP and observability smoke
+        env:
+          RAGEVAL_SERVING_API_KEY: phase14-ci-local-key  # pragma: allowlist secret
         run: |
           docker run --rm --network host \
-            -e RAGEVAL_SERVING_API_KEY=phase14-ci-local-key \
+            -e RAGEVAL_SERVING_API_KEY \
             rageval-test:ci python scripts/operational_smoke.py
       - name: Entire repository suite inside containerized environment
         run: |
