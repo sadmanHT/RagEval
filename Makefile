@@ -1,7 +1,7 @@
 .PHONY: install lint format format-check typecheck unit integration compose-up compose-down verify
 .PHONY: dense-report sparse-report hybrid-report retrieval-report generation-report evaluation-report
-.PHONY: evaluation-ablation-report serving-report evaluation-gate test smoke ci
-.PHONY: docker-build docker-test-image ops-up ops-down ops-smoke container-test
+.PHONY: evaluation-ablation-report serving-report evaluation-gate full-validation release-evaluation
+.PHONY: test smoke ci docker-build docker-test-image ops-up ops-down ops-smoke container-test
 
 install:
 	python -m pip install -e '.[dev]'
@@ -57,6 +57,13 @@ serving-report:
 
 evaluation-gate:
 	python scripts/evaluation_gate.py --mode pr
+
+full-validation: compose-up
+	python scripts/full_system_validation.py --artifact-dir artifacts/phase15/full-system
+
+release-evaluation:
+	python scripts/phase15_evaluation_reconciliation.py \
+		--output-dir artifacts/phase15/ablation
 
 docker-build:
 	docker build --target runtime -t rageval-api:local .
