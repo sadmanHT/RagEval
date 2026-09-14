@@ -66,11 +66,9 @@ The Phase 9 fixture builds **6 canonical chunks from 4 committed source document
 
 These are mechanics/provenance results, not neural-reranking or target-corpus quality results. Live Cohere validation was not run without credentials, and no local neural cross-encoder adapter is implemented, so full offline *neural* reranking is not currently available. Detailed evidence and limitations are in `docs/phases/phase-09-report.md`.
 
-## Accepted implementation, merge pending
-
 ### Phase 10 — Grounded generation, context assembly, citations, and Self-RAG routing
 
-PR #10 is open in draft on branch `phase-10-grounded-generation`. The accepted implementation head is `a249035ea60edf58faf4b84d88043f894e8632e0`, validated by GitHub Actions run `34767396626`. This documentation head must repeat the complete three-job gate before the PR is marked ready; merge and independent post-merge `main` validation are still required before Phase 10 is moved into the completed section.
+Merged to `main` as PR #10 at commit `87c2c329a12aa4fc3d4a5eb775ed2df32c3ce111` from final validated PR head `ec550e6cb1251f9dbb65894c3adc470fa2dd7456`. Final PR-head GitHub Actions run `34806206207` and independent merge-triggered `main` run `34806319174` both passed all three jobs: quality, integration with every inherited evidence gate plus the grounded-generation fixture and full regression, and dedicated installed-Tesseract OCR.
 
 Implemented scope:
 
@@ -98,7 +96,7 @@ These are mechanics/traceability results, not hosted-model quality or semantic-f
 
 ### Phase 11 — Evaluation dataset, metrics, and judge contracts
 
-After Phase 10 is merged and independently revalidated on `main`, Phase 11 should define the held-out evaluation dataset and metric/judge contracts over the stable retrieval and grounded-generation outputs. It must keep evaluation examples leakage-safe, use canonical chunk identity/provenance for context metrics, distinguish citation traceability from semantic faithfulness/entailment, represent refusals explicitly, and keep any hosted judge behind a deterministic-testable structured provider interface. No target roughly 200-question dataset, metric score, or provider result should be fabricated if the actual data or credentials are unavailable.
+Phase 11 should define the held-out evaluation dataset and metric/judge contracts over the stable retrieval and grounded-generation outputs. It must keep evaluation examples leakage-safe, use canonical chunk identity/provenance for context metrics, distinguish citation traceability from semantic faithfulness/entailment, represent refusals explicitly, and keep any hosted judge behind a deterministic-testable structured provider interface. No target roughly 200-question dataset, metric score, or provider result should be fabricated if the actual data or credentials are unavailable.
 
 ## Later phases
 

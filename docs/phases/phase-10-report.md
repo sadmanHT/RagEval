@@ -2,11 +2,14 @@
 
 ## Status
 
-Phase 10 implementation is accepted on the feature branch, but merge and independent post-merge `main` validation are still pending at this report head.
+Phase 10 is complete, merged, and independently revalidated on `main`.
 
 Accepted implementation head: `a249035ea60edf58faf4b84d88043f894e8632e0`.
 Accepted implementation GitHub Actions run: `34767396626` — quality, real-service integration/evidence/full regression, and dedicated installed-Tesseract OCR all passed.
-PR #10 remains draft until this documentation head repeats the complete three-job gate.
+Final validated PR head: `ec550e6cb1251f9dbb65894c3adc470fa2dd7456`.
+Final PR-head GitHub Actions run: `34806206207` — all three jobs passed after the canonical Phase 10 plan/report and repository-status documentation were added.
+PR #10 merged to `main` as commit `87c2c329a12aa4fc3d4a5eb775ed2df32c3ce111`.
+Independent merge-triggered `main` GitHub Actions run: `34806319174` — quality, integration with all inherited evidence plus the Phase 10 generation fixture and full regression, and dedicated installed-Tesseract OCR all passed.
 
 No live OpenAI generation result is claimed. Deterministic/local acceptance is complete; hosted request/response/retry/timeout behavior is covered with mocked HTTP.
 
@@ -147,6 +150,9 @@ Dedicated OCR:
 - Tesseract **5.3.4** installed
 - local OCR fixture — **1 passed in 0.60s**
 
+Final PR-head run `34806206207` repeated the complete three-job gate on head `ec550e6cb1251f9dbb65894c3adc470fa2dd7456`.
+Independent post-merge run `34806319174` repeated the complete three-job gate on merge commit `87c2c329a12aa4fc3d4a5eb775ed2df32c3ce111`.
+
 No test, assertion, lint/type gate, prior cleaning/chunking/dense/sparse/hybrid/reranking evidence step, smoke check, full regression test, or OCR validation was removed or weakened.
 
 ## Machine-readable Phase 10 fixture evidence
@@ -209,7 +215,9 @@ This proves the completion-gate mechanics for explicit refusal without unsupport
 1. Initial PR run `34766881183`: runtime integration, inherited fixture chain, new generation fixture, full regression, and dedicated OCR all passed. Quality stopped at Ruff import-order/line-length/builtin-timeout style findings.
 2. Those exact lint issues were fixed without changing assertions or runtime semantics. Run `34767130194` then passed Ruff; Ruff formatter identified five files needing canonical layout.
 3. Ruff's exact formatting changes were applied. Run `34767280650` passed lint, formatting, integration/full regression, and OCR. Strict mypy then found one local variable-name collision in `generation/providers.py` where a retry error string and parsed provider message object reused the same name.
-4. The local variable was renamed rather than suppressing typing. Run `34767396626` passed all three jobs and is the accepted implementation run.
+4. The local variable was renamed rather than suppressing typing. Run `34767396626` passed all three jobs and became the accepted implementation run.
+5. Canonical Phase 10 plan/report/status documentation was added without changing runtime behavior. Final PR-head run `34806206207` passed all three jobs; PR #10 was then marked ready and merged with exact-head protection.
+6. Merge commit `87c2c329a12aa4fc3d4a5eb775ed2df32c3ce111` triggered independent `main` run `34806319174`, which passed all three jobs and closed the behavioral acceptance loop.
 
 ## Provider validation
 
