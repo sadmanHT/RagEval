@@ -77,9 +77,7 @@ async def _run(output_dir: Path) -> dict[str, object]:
                 continue
             by_domain.setdefault(item.domain.value, []).append(item.mean_score)
         domain_scores[run.config.config_id] = {
-            domain: sum(values) / len(values)
-            for domain, values in by_domain.items()
-            if values
+            domain: sum(values) / len(values) for domain, values in by_domain.items() if values
         }
 
     domains = sorted({domain for scores in domain_scores.values() for domain in scores})
@@ -123,11 +121,7 @@ async def _run(output_dir: Path) -> dict[str, object]:
                 },
                 "domain_composite": domain_scores[run.config.config_id],
                 "failure_categories": sorted(
-                    {
-                        category.value
-                        for failure in run.failures
-                        for category in failure.categories
-                    }
+                    {category.value for failure in run.failures for category in failure.categories}
                 ),
             }
         )
