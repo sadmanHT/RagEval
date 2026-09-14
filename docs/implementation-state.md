@@ -66,12 +66,40 @@ The Phase 9 fixture builds **6 canonical chunks from 4 committed source document
 
 These are mechanics/provenance results, not neural-reranking or target-corpus quality results. Live Cohere validation was not run without credentials, and no local neural cross-encoder adapter is implemented, so full offline *neural* reranking is not currently available. Detailed evidence and limitations are in `docs/phases/phase-09-report.md`.
 
+## Accepted implementation, merge pending
+
+### Phase 10 — Grounded generation, context assembly, citations, and Self-RAG routing
+
+PR #10 is open in draft on branch `phase-10-grounded-generation`. The accepted implementation head is `a249035ea60edf58faf4b84d88043f894e8632e0`, validated by GitHub Actions run `34767396626`. This documentation head must repeat the complete three-job gate before the PR is marked ready; merge and independent post-merge `main` validation are still required before Phase 10 is moved into the completed section.
+
+Implemented scope:
+
+- deterministic context assembly over the canonical Phase 9 final reranked context;
+- stable rank ordering, explicit chunk/source metadata, separators, context-budget enforcement, deterministic truncation, and duplicate/near-duplicate suppression;
+- context and generation configuration fingerprints for later evaluation/audit;
+- provider-abstracted generation with deterministic fake acceptance and an OpenAI hosted reference adapter;
+- bounded OpenAI timeout/retry/backoff behavior with retryable 429/5xx/network/timeout handling and strict response/usage parsing;
+- structured grounded-answer parsing, canonical cited-chunk IDs, token/latency/provider/model/refusal metadata, and backward-compatible defaulted contract extensions;
+- application-side validation that cited chunk IDs exist in the exact supplied context;
+- bounded repair for malformed structured output, invalid citations, and inconsistent refusal state, with repair records and fail-closed exhaustion;
+- explicit insufficient-context refusal with zero citations;
+- prompt boundary that treats retrieved document instructions as untrusted data rather than system instructions;
+- default `AlwaysRetrieveRouter` plus opt-in conservative Self-RAG-style routing whose no-retrieval path refuses rather than producing an ungrounded answer under the grounded guarantee;
+- end-to-end service preserving the Phase 9 retrieval response and retrieval/rerank/multi-hop fingerprints in answer diagnostics;
+- permanent real-Qdrant/BM25/RRF/rerank/generation fixture evidence while retaining every previous CI gate.
+
+Accepted implementation evidence: Ruff passed; formatter reported **135 files already formatted**; strict mypy passed on **66 source files**; unit suite **125 passed**; ordinary integration **28 passed, 1 skipped**; full cumulative suite **153 passed, 1 skipped**; dedicated installed Tesseract 5.3.4 OCR **1 passed**.
+
+The Phase 10 fixture builds **6 canonical chunks from 4 committed source documents**. The answerable path cites `chk_0aa1f9408acc9a91748da01bf8ba93ee`, which is present in the exact supplied assembled context. The intentionally unsupported question `What is the lunar population of Europa in 2125?` returns `insufficient_context=true` with zero citations. Generation configuration fingerprint is `6b2bba681505a024536b962965e3e754190fde07416b7689ae8f976be607b508`; context configuration fingerprint is `3e21ad11a5cf2934c6babde30cce2247bec8a4f8d8c42fc8e5f50cf2467c0f42`.
+
+These are mechanics/traceability results, not hosted-model quality or semantic-faithfulness results. Live OpenAI generation was not run without credentials. Citation validation currently proves canonical ID membership in supplied context, not claim entailment. Context token accounting is deterministic mechanics accounting rather than exact hosted-model tokenization. Detailed evidence and limitations are in `docs/phases/phase-10-report.md`.
+
 ## Next phase
 
-### Phase 10 — Grounded generation, citations, and self-RAG
+### Phase 11 — Evaluation dataset, metrics, and judge contracts
 
-Phase 10 should consume the final ordered Phase 9 `RerankResult` context set while preserving all nested dense/sparse/RRF/query-expansion/rerank/hop diagnostics and canonical source provenance. Generation should assemble structured context, cite canonical chunk IDs for claims, refuse when evidence is insufficient, keep LLM providers behind explicit interfaces, and make any self-RAG/verification behavior observable and evaluation-ready.
+After Phase 10 is merged and independently revalidated on `main`, Phase 11 should define the held-out evaluation dataset and metric/judge contracts over the stable retrieval and grounded-generation outputs. It must keep evaluation examples leakage-safe, use canonical chunk identity/provenance for context metrics, distinguish citation traceability from semantic faithfulness/entailment, represent refusals explicitly, and keep any hosted judge behind a deterministic-testable structured provider interface. No target roughly 200-question dataset, metric score, or provider result should be fabricated if the actual data or credentials are unavailable.
 
 ## Later phases
 
-Evaluation, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.
+Evaluation running/ablation/failure analysis, serving, observability/deployment hardening, and final release validation remain intentionally deferred to their respective later phases.

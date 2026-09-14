@@ -89,12 +89,19 @@ class Citation(ContractModel):
 
 
 class GroundedAnswer(ContractModel):
+    """Stable grounded-answer contract extended in Phase 10 with defaulted audit fields."""
+
+    schema_version: str = "1.1"
     question: str = Field(min_length=1)
     answer: str = Field(min_length=1)
     citations: list[Citation] = Field(default_factory=list)
+    cited_chunk_ids: list[str] = Field(default_factory=list)
     insufficient_context: bool = False
+    refusal_reason: str | None = None
     provider: str = Field(min_length=1)
     model: str = Field(min_length=1)
+    input_tokens: int = Field(default=0, ge=0)
+    output_tokens: int = Field(default=0, ge=0)
     latency_ms: float = Field(ge=0)
     metadata: dict[str, object] = Field(default_factory=dict)
 

@@ -1,4 +1,4 @@
-.PHONY: install lint format format-check typecheck unit integration dense-report sparse-report hybrid-report retrieval-report test compose-up compose-down verify smoke ci
+.PHONY: install lint format format-check typecheck unit integration dense-report sparse-report hybrid-report retrieval-report generation-report test compose-up compose-down verify smoke ci
 
 install:
 	python -m pip install -e '.[dev]'
@@ -40,6 +40,9 @@ hybrid-report:
 retrieval-report:
 	python scripts/retrieval_service_fixture_report.py
 
+generation-report:
+	python scripts/generation_fixture_report.py
+
 smoke:
 	python -m rageval.smoke
 
@@ -48,4 +51,4 @@ test:
 
 verify: lint format-check typecheck unit
 
-ci: verify integration dense-report sparse-report hybrid-report retrieval-report smoke test
+ci: verify integration dense-report sparse-report hybrid-report retrieval-report generation-report smoke test
