@@ -28,7 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 observability = [
-    "langfuse>=4,<5",
+    "langfuse>=4.15.2,<5",
 ]
 dev = [
     "detect-secrets>=1.5,<2",
