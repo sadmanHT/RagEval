@@ -128,9 +128,7 @@ class ReviewedFixtureObservationProvider:
             answer=GroundedAnswer(
                 question=example.question,
                 answer=example.reference_answer,
-                citations=[
-                    Citation(chunk_id=support_ids[0], claim=example.reference_answer)
-                ],
+                citations=[Citation(chunk_id=support_ids[0], claim=example.reference_answer)],
                 cited_chunk_ids=[support_ids[0]],
                 provider=self.name,
                 model="deterministic-reviewed-fixture-v1",
@@ -263,11 +261,7 @@ async def _wait_for_eval(
 def _selected_manifest_items():
     manifest = scan_corpus(FIXTURE_ROOT).manifest
     selected = sorted(
-        (
-            item
-            for item in manifest.documents
-            if Path(item.relative_path).name in SELECTED_FIXTURES
-        ),
+        (item for item in manifest.documents if Path(item.relative_path).name in SELECTED_FIXTURES),
         key=lambda item: item.relative_path,
     )
     if len(selected) != len(SELECTED_FIXTURES):
@@ -637,9 +631,7 @@ async def _run(args: argparse.Namespace) -> FullSystemValidationReport:
                 )
 
                 retry_evidence = await _provider_retry_timeout_evidence()
-                scenarios.append(
-                    _scenario("provider-retry-timeout", **retry_evidence)
-                )
+                scenarios.append(_scenario("provider-retry-timeout", **retry_evidence))
 
                 substantive = chunks_by_name["paper.html"][0].text
                 always_service = GroundedGenerationService(
@@ -831,8 +823,7 @@ async def _run(args: argparse.Namespace) -> FullSystemValidationReport:
                 if not {"query", "evaluation"}.issubset(kinds):
                     raise AssertionError("full-system tracing missed query/evaluation linkage")
                 trace_payload = "\n".join(
-                    record.model_dump_json(exclude_none=True)
-                    for record in trace_sink.records
+                    record.model_dump_json(exclude_none=True) for record in trace_sink.records
                 )
                 if benchmark_question in trace_payload or substantive in trace_payload:
                     raise AssertionError("raw query text leaked into redacted trace payload")
@@ -847,9 +838,7 @@ async def _run(args: argparse.Namespace) -> FullSystemValidationReport:
 
                 changed_identity = identity.model_copy(
                     update={
-                        "index_fingerprint": hashlib.sha256(
-                            b"phase15-rebuilt-index-v2"
-                        ).hexdigest()
+                        "index_fingerprint": hashlib.sha256(b"phase15-rebuilt-index-v2").hexdigest()
                     }
                 )
                 changed_cache = RedisQueryCache.from_url(settings.redis_url)
