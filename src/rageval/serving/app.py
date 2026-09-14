@@ -225,14 +225,9 @@ def create_app(
     @app.exception_handler(Exception)
     async def unhandled_error(request: Request, exc: Exception) -> JSONResponse:
         logger.error(
-            "unhandled serving error",
-            extra={
-                "context": {
-                    "request_id": _request_id(request),
-                    "path": request.url.path,
-                    "exception_type": type(exc).__name__,
-                }
-            },
+            "unhandled serving error (%s)",
+            type(exc).__name__,
+            extra={"context": {"request_id": _request_id(request), "path": request.url.path}},
         )
         return _safe_json_error(
             _request_id(request),
@@ -417,13 +412,9 @@ async def _stream_query(
         yield (error.model_dump_json() + "\n").encode("utf-8")
     except Exception as exc:
         logger.error(
-            "streaming query failed",
-            extra={
-                "context": {
-                    "request_id": request_id,
-                    "exception_type": type(exc).__name__,
-                }
-            },
+            "streaming query failed (%s)",
+            type(exc).__name__,
+            extra={"context": {"request_id": request_id}},
         )
         error = StreamEvent(
             event="error",
