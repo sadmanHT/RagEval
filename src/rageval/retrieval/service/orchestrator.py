@@ -114,10 +114,16 @@ class RetrievalService:
         query: str,
         *,
         filters: HybridSearchFilter | None = None,
+        top_k: int | None = None,
     ) -> RetrievalServiceResponse:
         normalized_query = " ".join(query.split())
         if not normalized_query:
             raise ValueError("query must not be blank")
+        final_top_n = self.config.final_top_n if top_k is None else top_k
+        if final_top_n < 1 or final_top_n > self.config.max_merged_candidates:
+            raise ValueError(
+                "top_k must be between 1 and the configured max_merged_candidates budget"
+            )
         start = time.perf_counter()
         first_hop = await self.hybrid.search(
             normalized_query,
@@ -163,7 +169,7 @@ class RetrievalService:
         reranked = await self.reranker.rerank(
             normalized_query,
             merged,
-            top_n=self.config.final_top_n,
+            top_n=final_top_n,
         )
         decision = MultiHopDecision(
             triggered=should_multi_hop,
