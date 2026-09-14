@@ -4,7 +4,7 @@ import hashlib
 
 from rageval.generation import AssembledContext, ContextChunk, GroundedGenerationResponse
 from rageval.generation.models import RetrievalRouteDecision
-from rageval.models import Citation, Chunk, GroundedAnswer, RerankResult, RetrievalResult
+from rageval.models import Chunk, Citation, GroundedAnswer, RerankResult, RetrievalResult
 from rageval.observability import (
     DriftStatus,
     LangfuseTraceSink,
