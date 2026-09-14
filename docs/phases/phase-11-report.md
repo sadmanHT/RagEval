@@ -2,10 +2,15 @@
 
 ## Status
 
-Phase 11 implementation is accepted on the feature branch. Merge and independent post-merge `main` validation are still pending at this report head.
+**Complete.** Phase 11 is merged to `main` and independently revalidated after merge.
+
+Final validated PR head: `e3e2bd1388961fe8c5ba83c57a7be6f8066f60a8`.
+Final PR-head GitHub Actions run: `34819678161` — quality, real-service integration/evidence/full regression, and dedicated installed-Tesseract OCR all passed.
+Merge commit: `5cdfcaa409545cc448a8a3d99ecfd066c0239a8a`.
+Independent merge-triggered `main` run: `34819832613` — all three jobs passed again.
 
 Accepted implementation head: `d98b06cbfd676bf150c59ad8c78f1777672751b1`.
-Accepted implementation GitHub Actions run: `34819276865` — quality, real-service integration/evidence/full regression, and dedicated installed-Tesseract OCR all passed.
+Accepted implementation run: `34819276865` — all three jobs passed.
 
 The target roughly 200-question held-out evaluation set was not supplied. It was not fabricated. Phase 11 acceptance uses a clearly labeled three-record reviewed synthetic fixture for deterministic mechanics and arithmetic only.
 
@@ -134,7 +139,7 @@ Documentation:
 - `docs/plans/phase-11-evaluation-dataset-metrics-judge-contracts.md`
 - this report
 
-The feature branch also removes an accidental temporary `docs/plans/phase-11-noop.txt` file from its base history.
+The feature branch also removed an accidental temporary `docs/plans/phase-11-noop.txt` file from its base history.
 
 ## Required behavior tests
 
@@ -195,6 +200,8 @@ Dedicated OCR:
 
 - Tesseract **5.3.4** installed
 - local OCR fixture — **1 passed in 0.82s**
+
+Final PR-head run `34819678161` repeated the complete three-job gate on head `e3e2bd1388961fe8c5ba83c57a7be6f8066f60a8`. Independent post-merge `main` run `34819832613` repeated the same gate on merge commit `5cdfcaa409545cc448a8a3d99ecfd066c0239a8a`.
 
 No test, assertion, lint/type gate, prior cleaning/chunking/dense/sparse/hybrid/reranking/generation evidence step, smoke check, full regression test, or OCR validation was removed or weakened.
 
