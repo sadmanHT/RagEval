@@ -1,6 +1,7 @@
 .PHONY: install lint format format-check typecheck unit integration compose-up compose-down verify
 .PHONY: dense-report sparse-report hybrid-report retrieval-report generation-report evaluation-report
-.PHONY: evaluation-ablation-report serving-report test smoke ci
+.PHONY: evaluation-ablation-report serving-report evaluation-gate test smoke ci
+.PHONY: docker-build docker-test-image ops-up ops-down ops-smoke container-test
 
 install:
 	python -m pip install -e '.[dev]'
@@ -54,6 +55,27 @@ evaluation-ablation-report:
 serving-report:
 	python scripts/serving_fixture_report.py
 
+evaluation-gate:
+	python scripts/evaluation_gate.py --mode pr
+
+docker-build:
+	docker build --target runtime -t rageval-api:local .
+
+docker-test-image:
+	docker build --target test -t rageval-test:local .
+
+ops-up:
+	docker compose up -d --build qdrant redis api prometheus grafana
+
+ops-down:
+	docker compose down -v --remove-orphans
+
+ops-smoke: ops-up
+	python scripts/operational_smoke.py
+
+container-test: docker-test-image compose-up
+	docker run --rm --network host rageval-test:local pytest -q
+
 smoke:
 	python -m rageval.smoke
 
@@ -63,4 +85,4 @@ test:
 verify: lint format-check typecheck unit
 
 ci: verify integration dense-report sparse-report hybrid-report retrieval-report generation-report \
-	evaluation-report evaluation-ablation-report serving-report smoke test
+	evaluation-report evaluation-gate evaluation-ablation-report serving-report smoke test
