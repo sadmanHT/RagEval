@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 
 from rageval.serving.app import _stream_query
 from rageval.serving.cache import QueryCacheIdentity, build_query_cache_key
@@ -44,6 +45,11 @@ class _DisconnectAfterStartRequest:
         return True
 
 
+class _ConnectedRequest:
+    async def is_disconnected(self) -> bool:
+        return False
+
+
 async def test_stream_disconnect_cancels_inflight_query() -> None:
     started = asyncio.Event()
     cancelled = asyncio.Event()
@@ -81,3 +87,27 @@ async def test_stream_disconnect_cancels_inflight_query() -> None:
     assert chunks == []
     assert started.is_set()
     assert cancelled.is_set()
+
+
+async def test_stream_failure_is_sanitized(caplog) -> None:
+    async def execute(payload: QueryRequest, request_id: str) -> QueryResponse:
+        del payload, request_id
+        raise RuntimeError("provider token stream-secret-must-not-leak")
+
+    events = [
+        json.loads(chunk)
+        async for chunk in _stream_query(
+            request=_ConnectedRequest(),  # type: ignore[arg-type]
+            payload=QueryRequest(question="fail safely"),
+            request_id="request-5678",
+            execute=execute,
+            chunk_chars=32,
+        )
+    ]
+
+    assert len(events) == 1
+    assert events[0]["event"] == "error"
+    assert events[0]["data"]["code"] == "internal_error"
+    assert "stream-secret-must-not-leak" not in str(events)
+    assert "stream-secret-must-not-leak" not in caplog.text
+    assert "RuntimeError" in caplog.text
