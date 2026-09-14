@@ -1,4 +1,4 @@
-"""Bounded in-process evaluation job execution for Phase 13 serving."""
+"""Bounded in-process evaluation job execution for serving."""
 
 from __future__ import annotations
 
@@ -27,6 +27,22 @@ class EvaluationJobExecutor(Protocol):
     async def run(self, request: EvaluationRunRequest) -> ComparativeEvaluationReport: ...
 
 
+class EvaluationJobTelemetry(Protocol):
+    def record_evaluation_job(
+        self,
+        *,
+        job_id: str,
+        status: str,
+        queue_depth: int,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
+        dataset_fingerprint: str | None = None,
+        matrix_fingerprint: str | None = None,
+        evidence_label: str | None = None,
+        configuration_count: int | None = None,
+    ) -> None: ...
+
+
 class EvaluationJobQueueFull(RuntimeError):
     """Raised when the bounded evaluation queue cannot accept another run."""
 
@@ -52,6 +68,7 @@ class EvaluationJobManager:
         executor: EvaluationJobExecutor,
         max_concurrency: int = 1,
         max_queue_size: int = 8,
+        telemetry: EvaluationJobTelemetry | None = None,
     ) -> None:
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
@@ -61,6 +78,7 @@ class EvaluationJobManager:
         self.max_concurrency = max_concurrency
         self.queue: asyncio.Queue[str] = asyncio.Queue(maxsize=max_queue_size)
         self.records: dict[str, _JobRecord] = {}
+        self.telemetry = telemetry
         self._workers: list[asyncio.Task[None]] = []
         self._latest: EvaluationSummary | None = None
         self._lock = asyncio.Lock()
@@ -97,6 +115,8 @@ class EvaluationJobManager:
             except asyncio.QueueFull as exc:
                 self.records.pop(job_id, None)
                 raise EvaluationJobQueueFull("evaluation job queue is full") from exc
+            queue_depth = self.queue.qsize()
+        self._record_telemetry(record, queue_depth=queue_depth)
         return EvaluationJobAccepted(job_id=job_id, status=EvaluationJobState.QUEUED)
 
     async def status(self, job_id: str) -> EvaluationJobStatus | None:
@@ -132,6 +152,8 @@ class EvaluationJobManager:
             record.status = EvaluationJobState.RUNNING
             record.started_at = utc_now()
             request = record.request
+            queue_depth = self.queue.qsize()
+        self._record_telemetry(record, queue_depth=queue_depth)
         try:
             report = await self.executor.run(request)
             completed_at = utc_now()
@@ -149,6 +171,8 @@ class EvaluationJobManager:
                 record.status = EvaluationJobState.FAILED
                 record.completed_at = utc_now()
                 record.error_code = "evaluation_failed"
+                queue_depth = self.queue.qsize()
+            self._record_telemetry(record, queue_depth=queue_depth)
             return
 
         async with self._lock:
@@ -157,6 +181,24 @@ class EvaluationJobManager:
             record.completed_at = completed_at
             record.summary = summary
             self._latest = summary
+            queue_depth = self.queue.qsize()
+        self._record_telemetry(record, queue_depth=queue_depth)
+
+    def _record_telemetry(self, record: _JobRecord, *, queue_depth: int) -> None:
+        if self.telemetry is None:
+            return
+        summary = record.summary
+        self.telemetry.record_evaluation_job(
+            job_id=record.job_id,
+            status=record.status.value,
+            queue_depth=queue_depth,
+            started_at=record.started_at,
+            completed_at=record.completed_at,
+            dataset_fingerprint=summary.dataset_fingerprint if summary is not None else None,
+            matrix_fingerprint=summary.matrix_fingerprint if summary is not None else None,
+            evidence_label=summary.evidence_label if summary is not None else None,
+            configuration_count=summary.configuration_count if summary is not None else None,
+        )
 
 
 def _summarize_report(

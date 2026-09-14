@@ -1,0 +1,91 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP request rate",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum by (route, status_class) (rate(rageval_http_requests_total[5m]))", "legendFormat": "{{route}} {{status_class}}", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP p95 latency",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le, route) (rate(rageval_http_request_duration_seconds_bucket[5m])))", "legendFormat": "{{route}}", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "Pipeline stage p95 latency",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le, stage) (rate(rageval_pipeline_stage_duration_seconds_bucket[5m])))", "legendFormat": "{{stage}}", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+    },
+    {
+      "type": "stat",
+      "title": "Cache hit ratio",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum(rate(rageval_cache_requests_total{outcome=\"hit\"}[5m])) / clamp_min(sum(rate(rageval_cache_requests_total{outcome=~\"hit|miss\"}[5m])), 1e-9)", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8}
+    },
+    {
+      "type": "stat",
+      "title": "Evaluation queue depth",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "rageval_evaluation_queue_depth", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Provider failures",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum by (operation, provider) (rate(rageval_provider_failures_total[5m]))", "legendFormat": "{{operation}} {{provider}}", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+    },
+    {
+      "type": "timeseries",
+      "title": "Dependency readiness",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "rageval_dependency_ready", "legendFormat": "{{component}}", "refId": "A"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["rageval", "phase14"],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "label": "Prometheus",
+        "current": {"text": "Prometheus", "value": "Prometheus"}
+      }
+    ]
+  },
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "browser",
+  "title": "RAG-Eval Operational Overview",
+  "uid": "rageval-operational",
+  "version": 1
+}
