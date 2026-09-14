@@ -31,13 +31,7 @@ class LatencySummary(ContractModel):
 
     @model_validator(mode="after")
     def validate_order(self) -> LatencySummary:
-        if not (
-            self.minimum_ms
-            <= self.p50_ms
-            <= self.p95_ms
-            <= self.p99_ms
-            <= self.maximum_ms
-        ):
+        if not (self.minimum_ms <= self.p50_ms <= self.p95_ms <= self.p99_ms <= self.maximum_ms):
             raise ValueError("latency percentiles must be monotonic")
         return self
 
@@ -117,9 +111,7 @@ class FullSystemValidationReport(ContractModel):
     @model_validator(mode="after")
     def validate_release_gate(self) -> FullSystemValidationReport:
         deterministic_failures = [
-            item.name
-            for item in self.scenarios
-            if item.status is not ValidationStatus.PASSED
+            item.name for item in self.scenarios if item.status is not ValidationStatus.PASSED
         ]
         if self.release_gate_passed and deterministic_failures:
             raise ValueError(
