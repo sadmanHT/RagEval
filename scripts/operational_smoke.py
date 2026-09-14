@@ -10,9 +10,7 @@ import urllib.error
 import urllib.request
 
 API_URL = os.environ.get("RAGEVAL_SMOKE_API_URL", "http://127.0.0.1:8000").rstrip("/")
-PROMETHEUS_URL = os.environ.get(
-    "RAGEVAL_SMOKE_PROMETHEUS_URL", "http://127.0.0.1:9090"
-).rstrip("/")
+PROMETHEUS_URL = os.environ.get("RAGEVAL_SMOKE_PROMETHEUS_URL", "http://127.0.0.1:9090").rstrip("/")
 GRAFANA_URL = os.environ.get("RAGEVAL_SMOKE_GRAFANA_URL", "http://127.0.0.1:3000").rstrip("/")
 API_KEY = os.environ.get("RAGEVAL_SERVING_API_KEY", "local-compose-change-me")
 
