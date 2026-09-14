@@ -33,11 +33,7 @@ def _judge_response(score: float, verdict: JudgeVerdict) -> JudgeResponse:
 def _answer(*, insufficient: bool = False) -> GroundedAnswer:
     return GroundedAnswer(
         question="What happened?",
-        answer=(
-            "Context is insufficient."
-            if insufficient
-            else "Revenue rose. Margin improved."
-        ),
+        answer=("Context is insufficient." if insufficient else "Revenue rose. Margin improved."),
         citations=(
             []
             if insufficient
@@ -56,10 +52,13 @@ def _answer(*, insufficient: bool = False) -> GroundedAnswer:
 
 
 def test_context_precision_deduplicates_retrieved_ids() -> None:
-    assert context_precision(
-        ["chunk_a", "chunk_a", "chunk_b"],
-        ["chunk_a"],
-    ) == 0.5
+    assert (
+        context_precision(
+            ["chunk_a", "chunk_a", "chunk_b"],
+            ["chunk_a"],
+        )
+        == 0.5
+    )
 
 
 def test_context_recall_handles_empty_context_and_no_required_support() -> None:
