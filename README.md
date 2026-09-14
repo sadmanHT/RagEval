@@ -4,7 +4,7 @@ RAG-Eval is a production-oriented Retrieval-Augmented Generation system whose pr
 
 ## Current status
 
-Phases 1–13 are merged and verified on `main`. The pipeline now covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking, reproducible dense Qdrant retrieval, deterministic BM25/BM25+ sparse retrieval, RRF hybrid fusion, a reranked retrieval-service layer with bounded multi-hop over the same canonical chunk identities, provider-abstracted grounded generation with deterministic context assembly/citation validation/refusal, leakage-aware evaluation dataset/metric/judge contracts, a resumable comparative-evaluation runner with configuration matrices/regression policies/experiment tracking/reporting/failure analysis, and a typed async FastAPI serving boundary with API-key authentication, correctness-scoped Redis caching, structured transport streaming, health/readiness checks, request correlation, bounded query concurrency, and bounded evaluation jobs. The next work is observability/scheduled evaluation, deployment hardening, and representative validation when the real corpus/evaluation set and required provider credentials are available.
+Phases 1–14 are merged and verified on `main`. The pipeline now covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking, reproducible dense Qdrant retrieval, deterministic BM25/BM25+ sparse retrieval, RRF hybrid fusion, a reranked retrieval-service layer with bounded multi-hop over the same canonical chunk identities, provider-abstracted grounded generation with deterministic context assembly/citation validation/refusal, leakage-aware evaluation dataset/metric/judge contracts, a resumable comparative-evaluation runner with configuration matrices/regression policies/experiment tracking/reporting/failure analysis, a typed async FastAPI serving boundary, sanitized operational tracing, low-cardinality Prometheus metrics, provisioned Grafana dashboards, containerized operational smoke/outage testing, scheduled evaluation semantics, dependency/secret scanning, and serving abuse/security controls. The next work is production deployment/platform hardening and representative validation when the real corpus/evaluation set and required provider credentials are available.
 
 Phase 6 dense retrieval consumes canonical Phase 5 chunks, embeds them behind a replaceable provider boundary, preserves stable chunk/configuration/provenance identity in reconstructable Qdrant payloads, and returns the canonical `RetrievalResult` contract. The deterministic/local acceptance path uses a local hashed embedding adapter for mechanics and real-Qdrant integration only; live OpenAI embedding validation remains unrun without credentials.
 
@@ -26,9 +26,11 @@ Phase 12 consumes those contracts through `AsyncEvaluationRunner`: bounded concu
 
 Phase 13 exposes the canonical Phase 9–12 retrieval/generation/evaluation stack rather than rebuilding it behind HTTP. `/query` supports typed question/domain/filter/`top_k` options, API-key authentication, request IDs, body/time/concurrency limits, grounded cited answers, optional retrieval diagnostics, correctness-scoped Redis caching, and NDJSON transport streaming with a final structured citation event. `/health/live` and `/health/ready` separate process liveness from dependency readiness. `/eval/run`, `/eval/jobs/{job_id}`, and `/eval/latest` use a fixed-worker bounded in-process queue. Unexpected request, streaming, and evaluation-worker failures return safe generic errors and do not log arbitrary downstream exception strings. The real-local acceptance path uses Qdrant + Redis with deterministic providers and is explicitly mechanics/grounding/traceability evidence, not a production serving benchmark.
 
-The target roughly 200-question evaluation set and representative roughly 12,000-document corpus are not present and were not fabricated. Phase 11/12 deterministic acceptance uses three reviewed synthetic financial/legal/research records, and Phase 13 serving acceptance uses the committed four-document/six-chunk fixture path. The lexical rule judge, optional injected-scorer RAGAS adapter, Phase 12 deterministic observation provider, and Phase 13 deterministic serving providers validate measurement/orchestration/schema/arithmetic/serving mechanics only; no live LLM judge, actual RAGAS-backed semantic result, representative ablation winner, hosted-provider quality result, target-corpus serving benchmark, or production latency/cost/load result is claimed.
+Phase 14 instruments that same serving/evaluation boundary rather than creating a parallel operational path. Query/evaluation traces are Langfuse-compatible and sanitized by construction: raw document/context text is never exported, raw query text is off by default, and rank/RRF/rerank/context/citation/provider/token/latency evidence remains observable. Prometheus exposes bounded-cardinality request/error/stage/cache/provider/token/cost/evaluation/dependency metrics, Grafana is provisioned from source control, and drift hooks retain bounded query-length/embedding-norm aggregates with explicit insufficient-data handling. The runtime image is non-root, the Compose stack covers API/Qdrant/Redis/Prometheus/Grafana, PR CI builds and tests the stack from clean volumes, the full repository suite runs inside the Tesseract-enabled test image, and an actual Qdrant outage must produce readiness degradation plus a dependency metric. PR-fast evaluation remains a pre-merge blocker while scheduled/manual evaluation is alert/report-only. Dependency auditing, secret scanning, Dependabot, exact-origin CORS defaults, bounded security headers, response hardening, and a hashed per-process rate limiter complete the Phase 14 operational baseline.
 
-The small committed fixtures verify mechanics, provenance, deterministic ordering, retry/error handling, top-5 orchestration, two-hop recovery, context budgeting, citation traceability, bounded repair, prompt-boundary behavior, explicit refusal, metric arithmetic, judge schema auditing, run fingerprinting, resumable evaluation, regression semantics, report generation, failure classification, authenticated serving, cache identity/invalidation, streaming citation preservation, readiness degradation, and bounded evaluation jobs rather than production retrieval/generation/evaluation quality. No neural-reranking quality, hosted-model answer quality, target-corpus retrieval improvement, representative faithfulness/hallucination/answer-relevancy score, production ablation winner, or production latency/cost benchmark is claimed from these fixtures.
+The target roughly 200-question evaluation set and representative roughly 12,000-document corpus are not present and were not fabricated. Phase 11/12 deterministic acceptance uses three reviewed synthetic financial/legal/research records, Phase 13 serving acceptance uses the committed four-document/six-chunk fixture path, and Phase 14 adds deterministic operational/container fixtures rather than representative workloads. The lexical rule judge, optional injected-scorer RAGAS adapter, deterministic observation/serving providers, and Phase 14 local operational stack validate measurement/orchestration/schema/arithmetic/serving/operations mechanics only; no live LLM judge, actual RAGAS-backed semantic result, representative ablation winner, hosted-provider quality result, production load/SLO/cost result, or statistically significant drift result is claimed.
+
+The small committed fixtures verify mechanics, provenance, deterministic ordering, retry/error handling, top-5 orchestration, two-hop recovery, context budgeting, citation traceability, bounded repair, prompt-boundary behavior, explicit refusal, metric arithmetic, judge schema auditing, run fingerprinting, resumable evaluation, regression semantics, report generation, failure classification, authenticated serving, cache identity/invalidation, streaming citation preservation, readiness degradation, bounded evaluation jobs, sanitized telemetry, metric-cardinality controls, non-root container execution, clean-stack startup, security scanning, and dependency-outage observability rather than production retrieval/generation/evaluation quality. No neural-reranking quality, hosted-model answer quality, target-corpus retrieval improvement, representative faithfulness/hallucination/answer-relevancy score, production ablation winner, production load result, or production latency/cost benchmark is claimed from these fixtures.
 
 ## Quick start
 
@@ -46,10 +48,23 @@ make hybrid-report
 make retrieval-report
 make generation-report
 make evaluation-report
+make evaluation-gate
 make evaluation-ablation-report
 make serving-report
 make smoke
 ```
+
+Start and verify the Phase 14 operational stack:
+
+```bash
+export RAGEVAL_SERVING_API_KEY=replace-this-local-key
+make docker-build
+make ops-smoke
+make container-test
+make ops-down
+```
+
+See `docs/operations.md` for Prometheus/Grafana, external Langfuse, scheduled evaluation, outage drills, security boundaries, and recovery guidance.
 
 Inspect a corpus without parsing document contents:
 
@@ -104,11 +119,12 @@ python scripts/hybrid_fixture_report.py
 python scripts/retrieval_service_fixture_report.py
 python scripts/generation_fixture_report.py
 python scripts/evaluation_fixture_report.py
+python scripts/evaluation_gate.py --mode pr
 python scripts/evaluation_ablation_fixture_report.py
 python scripts/serving_fixture_report.py
 ```
 
-The dense fixture report uses real local Qdrant; the sparse report validates deterministic BM25+ identity and exact-term retrieval; the hybrid report validates concurrent RRF mechanics and bounded expansion; the retrieval-service report validates top-5 reranking plus bounded two-hop recovery; the generation report validates retrieval-to-context-to-grounded-answer citation traceability plus explicit unsupported-question refusal; the evaluation report validates deterministic metric arithmetic, hallucination count/rate consistency, structured judge/version metadata, and dataset/config/run fingerprints; the Phase 12 ablation report validates resumable comparative-run mechanics, distinct configuration fingerprints, per-domain/sample-count aggregation, experiment tracking, failure classification, and JSON/Markdown/HTML reporting; and the Phase 13 serving report validates authenticated query/evaluation HTTP contracts, real local Qdrant/Redis readiness, cache hit and index-fingerprint invalidation, bounded job completion, and final streaming citation preservation. All use committed fixtures and emit machine-readable evidence.
+The dense fixture report uses real local Qdrant; the sparse report validates deterministic BM25+ identity and exact-term retrieval; the hybrid report validates concurrent RRF mechanics and bounded expansion; the retrieval-service report validates top-5 reranking plus bounded two-hop recovery; the generation report validates retrieval-to-context-to-grounded-answer citation traceability plus explicit unsupported-question refusal; the evaluation report validates deterministic metric arithmetic, hallucination count/rate consistency, structured judge/version metadata, and dataset/config/run fingerprints; the Phase 12 ablation report validates resumable comparative-run mechanics, distinct configuration fingerprints, per-domain/sample-count aggregation, experiment tracking, failure classification, and JSON/Markdown/HTML reporting; the Phase 13 serving report validates authenticated query/evaluation HTTP contracts, real local Qdrant/Redis readiness, cache hit and index-fingerprint invalidation, bounded job completion, and final streaming citation preservation; and the Phase 14 PR-fast gate validates pre-merge regression-policy mechanics against the committed fixture. All use committed fixtures and emit machine-readable evidence.
 
 The Phase 9 fixture proves deterministic reranking can move a canonical candidate from pre-rerank rank 6 to post-rerank rank 1 while preserving the original retrieval/provenance object. Its multi-hop fixture proves a bounded second hop can recover a non-adjacent legal chunk while retaining both hop traces. These are mechanics fixtures, not retrieval-quality benchmarks.
 
@@ -119,6 +135,8 @@ The Phase 11 fixture evaluates 3 reviewed synthetic records. It computes one fla
 The Phase 12 fixture evaluates the same 3 reviewed synthetic records under 5 deliberately distinct configurations. It verifies that summaries are recomputed from per-example records and that each configuration has distinct run/configuration identity. It is explicitly labeled `deterministic-fixture-ablation-mechanics-only` and does not establish a preferred chunker, retrieval architecture, expansion policy, or multi-hop policy.
 
 The Phase 13 fixture builds 6 canonical chunks from 4 committed source documents behind real local Qdrant and Redis. It verifies authenticated cited query responses, readiness, cache reuse, cache invalidation after index identity changes, final streaming citations, and evaluation-job completion. It is labeled `phase13-serving-fixture-mechanics-only` and does not establish hosted-provider quality, production scale, or SLO performance.
+
+The Phase 14 operational fixture starts API/Qdrant/Redis/Prometheus/Grafana from clean volumes, verifies an authenticated cited query and evaluation job, checks `/metrics`, Prometheus scraping and Grafana health, runs the cumulative suite in a Tesseract-enabled container, and then stops Qdrant to prove HTTP 503 readiness plus `rageval_dependency_ready{component="qdrant"} 0.0`. It is labeled `phase14-container-operational-mechanics-only` and is not a production load or quality benchmark.
 
 The corpus layout is `<root>/<development|evaluation>/<financial|legal|research>/<file>`.
 Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
@@ -152,8 +170,12 @@ Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
 - Serving must preserve the canonical retrieval/generation/evaluation contracts, authenticate callers, bound expensive concurrency, and version cache identity with every answer-affecting artifact.
 - Streaming must preserve a final structured citation/refusal contract; transport streaming is not represented as provider-native token streaming.
 - Generic serving failures must not expose or log arbitrary downstream exception strings that may contain credentials.
+- Operational traces must prefer identifiers, fingerprints, ranks, aggregate metadata, and configured redaction over raw document/context content.
+- Metric labels must remain bounded; request/job/document/chunk identifiers and user text are not acceptable Prometheus labels.
+- Drift indicators are heuristic aggregate signals and must report insufficient-data states rather than claiming significance from tiny samples.
+- PR blockers must execute before merge; scheduled/post-merge evaluation is alert/report semantics, not retroactive merge blocking.
 - Deterministic/local providers and tiny fixtures validate mechanics, not learned semantic quality, hosted-model answer quality, or production retrieval/generation/evaluation quality.
-- No chunking, retrieval, routing, generation, evaluation, or serving strategy is considered preferable without representative evaluation evidence.
+- No chunking, retrieval, routing, generation, evaluation, serving, or operational strategy is considered preferable without representative evaluation evidence.
 - Every phase must pass its own tests and the cumulative regression suite before completion.
 
-See `docs/implementation-state.md`, `docs/architecture-decisions.md`, `docs/phases/`, and `docs/plans/`.
+See `docs/implementation-state.md`, `docs/architecture-decisions.md`, `docs/operations.md`, `docs/phases/`, and `docs/plans/`.
