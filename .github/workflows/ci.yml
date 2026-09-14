@@ -118,12 +118,23 @@ jobs:
             -e RAGEVAL_QDRANT_URL=http://127.0.0.1:6333 \
             -e RAGEVAL_REDIS_URL=redis://127.0.0.1:6379/0 \
             rageval-test:ci pytest -q
+      - name: Real full-system validation inside test container
+        run: |
+          GITHUB_SHA="${{ github.event.pull_request.head.sha || github.sha }}" \
+          docker run --rm --network host \
+            -e GITHUB_SHA \
+            -e RAGEVAL_QDRANT_URL=http://127.0.0.1:6333 \
+            -e RAGEVAL_REDIS_URL=redis://127.0.0.1:6379/0 \
+            rageval-test:ci \
+            python scripts/full_system_validation.py \
+              --artifact-dir /tmp/phase15-container --require-ocr
       - name: Simulate Qdrant outage and verify readiness plus metrics
         run: |
           docker compose stop qdrant
           code=000
           for attempt in $(seq 1 20); do
-            code=$(curl -sS -o /tmp/readiness.json -w '%{http_code}' http://127.0.0.1:8000/health/ready || true)
+            code=$(curl -sS -o /tmp/readiness.json -w '%{http_code}' \
+              http://127.0.0.1:8000/health/ready || true)
             if [ "$code" = "503" ]; then
               break
             fi
@@ -131,7 +142,24 @@ jobs:
           done
           test "$code" = "503"
           cat /tmp/readiness.json
-          curl -fsS http://127.0.0.1:8000/metrics | grep -F 'rageval_dependency_ready{component="qdrant"} 0.0'
+          curl -fsS http://127.0.0.1:8000/metrics | \
+            grep -F 'rageval_dependency_ready{component="qdrant"} 0.0'
+      - name: Restart Qdrant and verify readiness recovery
+        run: |
+          docker compose start qdrant
+          code=000
+          for attempt in $(seq 1 30); do
+            code=$(curl -sS -o /tmp/readiness-recovered.json -w '%{http_code}' \
+              http://127.0.0.1:8000/health/ready || true)
+            if [ "$code" = "200" ]; then
+              break
+            fi
+            sleep 1
+          done
+          test "$code" = "200"
+          cat /tmp/readiness-recovered.json
+          curl -fsS http://127.0.0.1:8000/metrics | \
+            grep -F 'rageval_dependency_ready{component="qdrant"} 1.0'
       - name: Operational logs on failure
         if: failure()
         run: docker compose logs --no-color
@@ -156,7 +184,9 @@ jobs:
       - name: Secret scan of production and operational surfaces
         run: |
           detect-secrets scan src .github Dockerfile docker-compose.yml Makefile \
-            scripts/operational_smoke.py scripts/evaluation_gate.py > /tmp/detect-secrets.json
+            scripts/operational_smoke.py scripts/evaluation_gate.py \
+            scripts/full_system_validation.py \
+            scripts/phase15_evaluation_reconciliation.py > /tmp/detect-secrets.json
           python - <<'PY'
           import json
           from pathlib import Path
@@ -192,3 +222,68 @@ jobs:
           sudo apt-get install -y tesseract-ocr
       - name: Local OCR fixture
         run: pytest -q -m local_ocr tests/integration/test_local_ocr.py
+
+  release-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install deterministic release dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr
+      - name: Start clean Qdrant and Redis
+        run: |
+          docker compose down -v --remove-orphans
+          docker compose up -d qdrant redis
+          python scripts/wait_for_services.py
+      - name: Full-system validation and measured benchmark
+        run: |
+          mkdir -p artifacts/phase15
+          GITHUB_SHA="${{ github.event.pull_request.head.sha || github.sha }}" \
+          python scripts/full_system_validation.py \
+            --artifact-dir artifacts/phase15/full-system \
+            --require-ocr \
+            > artifacts/phase15/full-system-stdout.json
+      - name: Reviewed-set ablation reconciliation
+        run: |
+          python scripts/phase15_evaluation_reconciliation.py \
+            --output-dir artifacts/phase15/ablation \
+            > artifacts/phase15/reconciliation-stdout.json
+      - name: Validate release artifacts are machine-readable
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          validation = json.loads(
+              Path('artifacts/phase15/full-system/full-system-validation.json').read_text()
+          )
+          reconciliation = json.loads(
+              Path('artifacts/phase15/ablation/phase15-reconciliation.json').read_text()
+          )
+          assert validation['release_gate_passed'] is True
+          assert validation['evaluation']['reviewed_record_count'] == 3
+          assert reconciliation['reviewed_record_count'] == 3
+          assert reconciliation['target_200_available'] is False
+          print('phase15 release artifacts validated')
+          PY
+      - name: Upload Phase 15 release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase15-release-evidence-${{ github.run_id }}
+          path: artifacts/phase15/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Release-validation logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Tear down release infrastructure
+        if: always()
+        run: docker compose down -v --remove-orphans
