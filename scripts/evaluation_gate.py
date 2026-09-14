@@ -53,7 +53,8 @@ def _evaluate(payload: dict[str, object]) -> list[str]:
     records = payload.get("fixture_records")
     if not isinstance(records, int) or isinstance(records, bool) or records < _MIN_FIXTURE_RECORDS:
         failures.append(
-            f"fixture_records={records!r} below required mechanics sample count={_MIN_FIXTURE_RECORDS}"
+            f"fixture_records={records!r} below required mechanics "
+            f"sample count={_MIN_FIXTURE_RECORDS}"
         )
 
     hallucination = payload.get("hallucination")
@@ -67,7 +68,8 @@ def _evaluate(payload: dict[str, object]) -> list[str]:
             failures.append("hallucination rate is missing or non-numeric")
         elif float(rate) > _MAX_HALLUCINATION_RATE:
             failures.append(
-                f"hallucination_rate={float(rate):.6f} above fixture ceiling={_MAX_HALLUCINATION_RATE:.6f}"
+                f"hallucination_rate={float(rate):.6f} above fixture "
+                f"ceiling={_MAX_HALLUCINATION_RATE:.6f}"
             )
         if not isinstance(flagged, int) or not isinstance(total, int) or total <= 0:
             failures.append("hallucination count/denominator is invalid")
@@ -101,11 +103,11 @@ def main() -> None:
     print(json.dumps(report, indent=2, sort_keys=True))
 
     if failures and args.mode == "nightly":
-        print(
-            "::warning::Scheduled deterministic evaluation fixture detected regression policy violations: "
-            + "; ".join(failures),
-            file=sys.stderr,
+        warning = (
+            "::warning::Scheduled deterministic evaluation fixture detected "
+            "regression policy violations: "
         )
+        print(warning + "; ".join(failures), file=sys.stderr)
     if failures and args.mode == "pr":
         raise SystemExit(1)
 
