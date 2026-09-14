@@ -66,6 +66,8 @@ jobs:
         run: python scripts/retrieval_service_fixture_report.py
       - name: Grounded generation fixture evidence
         run: python scripts/generation_fixture_report.py
+      - name: Evaluation metrics fixture evidence
+        run: python scripts/evaluation_fixture_report.py
       - name: Package smoke test
         run: python -m rageval.smoke
       - name: Full regression suite

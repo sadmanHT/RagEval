@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -107,17 +108,33 @@ class GroundedAnswer(ContractModel):
 
 
 class EvaluationExample(ContractModel):
+    """Held-out evaluation example with defaulted Phase 11 governance fields."""
+
+    schema_version: str = "2.0"
     example_id: str = Field(min_length=8)
     question: str = Field(min_length=1)
     reference_answer: str = Field(min_length=1)
     domain: Domain
+    supporting_document_ids: list[str] = Field(default_factory=list)
     supporting_chunk_ids: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    table_parsing_required: bool = False
+    split: Literal["evaluation"] = "evaluation"
+    provenance: dict[str, object] = Field(default_factory=dict)
+    reviewer_status: Literal["draft", "reviewed", "approved", "rejected"] = "draft"
+    reviewer: str | None = Field(default=None, min_length=1)
     metadata: dict[str, object] = Field(default_factory=dict)
 
 
 class EvaluationResult(ContractModel):
+    """One traceable metric result for one evaluation example."""
+
+    schema_version: str = "1.1"
     example_id: str = Field(min_length=8)
     metric: str = Field(min_length=1)
     score: float = Field(ge=0, le=1)
     evaluator: str = Field(min_length=1)
+    metric_version: str = "1.0"
+    dataset_fingerprint: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    run_fingerprint: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     metadata: dict[str, object] = Field(default_factory=dict)
