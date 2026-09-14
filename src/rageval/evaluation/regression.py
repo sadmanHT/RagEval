@@ -119,15 +119,11 @@ def compare_metric_slices(
             violation = True
         else:
             delta = after.mean_score - before.mean_score
-            below_floor = (
-                threshold.min_score is not None and after.mean_score < threshold.min_score
-            )
+            below_floor = threshold.min_score is not None and after.mean_score < threshold.min_score
             excessive_drop = delta < -threshold.max_drop
             if below_floor or excessive_drop:
                 status = RegressionStatus.DEGRADATION
-                detail = (
-                    f"candidate delta={delta:.6f} exceeded max_drop={threshold.max_drop:.6f}"
-                )
+                detail = f"candidate delta={delta:.6f} exceeded max_drop={threshold.max_drop:.6f}"
                 if below_floor:
                     detail += f" or fell below min_score={threshold.min_score:.6f}"
                 violation = True
