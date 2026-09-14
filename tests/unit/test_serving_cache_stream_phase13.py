@@ -35,16 +35,22 @@ def test_cache_key_invalidates_on_identity_or_filter_changes() -> None:
     assert build_query_cache_key(changed_filter, _identity()) != base_key
 
 
-class _DisconnectedRequest:
+class _DisconnectAfterStartRequest:
+    def __init__(self, started: asyncio.Event) -> None:
+        self.started = started
+
     async def is_disconnected(self) -> bool:
+        await self.started.wait()
         return True
 
 
 async def test_stream_disconnect_cancels_inflight_query() -> None:
+    started = asyncio.Event()
     cancelled = asyncio.Event()
 
     async def execute(payload: QueryRequest, request_id: str) -> QueryResponse:
         del payload, request_id
+        started.set()
         try:
             await asyncio.sleep(60)
         finally:
@@ -65,7 +71,7 @@ async def test_stream_disconnect_cancels_inflight_query() -> None:
     chunks = [
         chunk
         async for chunk in _stream_query(
-            request=_DisconnectedRequest(),  # type: ignore[arg-type]
+            request=_DisconnectAfterStartRequest(started),  # type: ignore[arg-type]
             payload=QueryRequest(question="disconnect me"),
             request_id="request-1234",
             execute=execute,
@@ -73,4 +79,5 @@ async def test_stream_disconnect_cancels_inflight_query() -> None:
         )
     ]
     assert chunks == []
+    assert started.is_set()
     assert cancelled.is_set()
