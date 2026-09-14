@@ -1,0 +1,76 @@
+from __future__ import annotations
+
+import asyncio
+
+from rageval.serving.app import _stream_query
+from rageval.serving.cache import QueryCacheIdentity, build_query_cache_key
+from rageval.serving.models import QueryRequest, QueryResponse, StageLatency
+
+
+def _identity() -> QueryCacheIdentity:
+    return QueryCacheIdentity(
+        index_fingerprint="1" * 64,
+        retrieval_config_fingerprint="2" * 64,
+        generation_config_fingerprint="3" * 64,
+        model_version="model-v1",
+        prompt_version="prompt-v1",
+    )
+
+
+def test_cache_key_invalidates_on_identity_or_filter_changes() -> None:
+    base = QueryRequest(question="What is revenue?", domain="financial", top_k=5)
+    base_key = build_query_cache_key(base, _identity())
+
+    changed_index = _identity().model_copy(update={"index_fingerprint": "4" * 64})
+    changed_prompt = _identity().model_copy(update={"prompt_version": "prompt-v2"})
+    changed_filter = QueryRequest(
+        question="What is revenue?",
+        domain="financial",
+        top_k=5,
+        filters={"document_id": "doc_12345678"},
+    )
+
+    assert build_query_cache_key(base, changed_index) != base_key
+    assert build_query_cache_key(base, changed_prompt) != base_key
+    assert build_query_cache_key(changed_filter, _identity()) != base_key
+
+
+class _DisconnectedRequest:
+    async def is_disconnected(self) -> bool:
+        return True
+
+
+async def test_stream_disconnect_cancels_inflight_query() -> None:
+    cancelled = asyncio.Event()
+
+    async def execute(payload: QueryRequest, request_id: str) -> QueryResponse:
+        del payload, request_id
+        try:
+            await asyncio.sleep(60)
+        finally:
+            cancelled.set()
+        return QueryResponse(
+            request_id="request-1234",
+            answer="unused",
+            provider="fixture",
+            model="fixture",
+            latency=StageLatency(
+                retrieval_ms=0.0,
+                generation_ms=0.0,
+                total_pipeline_ms=0.0,
+                api_ms=0.0,
+            ),
+        )
+
+    chunks = [
+        chunk
+        async for chunk in _stream_query(
+            request=_DisconnectedRequest(),  # type: ignore[arg-type]
+            payload=QueryRequest(question="disconnect me"),
+            request_id="request-1234",
+            execute=execute,
+            chunk_chars=32,
+        )
+    ]
+    assert chunks == []
+    assert cancelled.is_set()
