@@ -2,10 +2,15 @@
 
 ## Status
 
-**Implementation acceptance complete; merge/post-merge closure pending.**
+**Complete.** Phase 12 is merged to `main` and independently revalidated after merge.
 
 Accepted implementation head: `7d91009058ccdc680de7f59ee6f53c9f01461d5b`.
 Accepted implementation GitHub Actions run: `34825099209` — quality, the complete inherited integration/evidence/full-regression chain, and dedicated installed-Tesseract OCR all passed.
+
+Final validated PR head: `469a935581252607ea85e7aec1cfddc5d1bb14ad`.
+Final PR-head GitHub Actions run: `34825381598` — all three jobs passed again after the Phase 12 acceptance report was added.
+Merge commit: `9bcb40a183ca3afe380f5cb684671a9e29b3f852`.
+Independent merge-triggered `main` run: `34825477749` — quality, complete integration/evidence/full regression, and dedicated installed-Tesseract OCR all passed.
 
 The target roughly 200-question held-out evaluation set and representative roughly 12,000-document corpus are still not present. They were not fabricated. Phase 12 acceptance therefore uses the existing three-record reviewed synthetic evaluation fixture plus deterministic/local providers to validate runner, ablation, reporting, regression, and failure-analysis mechanics only.
 
@@ -198,6 +203,8 @@ Dedicated OCR:
 - Tesseract installation — passed
 - local OCR fixture — passed
 
+Final PR-head run `34825381598` repeated the complete three-job gate on `469a935581252607ea85e7aec1cfddc5d1bb14ad`. Independent post-merge `main` run `34825477749` repeated the same gate on merge commit `9bcb40a183ca3afe380f5cb684671a9e29b3f852`.
+
 No lint rule, formatter gate, type-checking strictness, test assertion, previous evidence step, full regression check, or OCR validation was removed or weakened.
 
 ## Machine-readable Phase 12 fixture evidence
@@ -234,7 +241,9 @@ The fixture deliberately injects configuration-dependent retrieval misses, distr
 1. The first Phase 12 CI candidate demonstrated that the runtime path already worked: integration, inherited evidence, the new comparative-evaluation fixture, full regression, and dedicated OCR passed. Quality stopped at Ruff formatter findings before mypy/unit.
 2. Formatter-safe source changes were applied in `failures.py` and `regression.py` without changing semantics or weakening lint/tests.
 3. The remaining formatter finding in `reporting.py` was repaired by using Ruff's canonical short f-string layout for the dataset/matrix fingerprint HTML lines.
-4. Exact head `7d91009058ccdc680de7f59ee6f53c9f01461d5b` then passed all three jobs together in run `34825099209`, including lint, format, strict mypy, unit, integration/evidence/full regression, and installed OCR.
+4. Exact head `7d91009058ccdc680de7f59ee6f53c9f01461d5b` passed all three jobs in run `34825099209`.
+5. Final documentation PR head `469a935581252607ea85e7aec1cfddc5d1bb14ad` passed run `34825381598`.
+6. PR #12 merged as `9bcb40a183ca3afe380f5cb684671a9e29b3f852`, and independent `main` run `34825477749` passed the same complete gate.
 
 ## Provider and representative-run validation
 
@@ -299,6 +308,6 @@ Dedicated installed-OCR validation remains separate:
 pytest -q -m local_ocr tests/integration/test_local_ocr.py
 ```
 
-## Closure sequence
+## Next handoff
 
-Before Phase 12 is called fully closed, this report commit must pass the complete PR-head gate, PR #12 must be merged, and the merge commit must independently pass the same three-job CI gate on `main`. Final merge/main identifiers will be recorded after those checks succeed.
+Phase 12 leaves the repository with a repeatable comparative-evaluation and failure-analysis layer. The next repository work should consume this evidence layer for serving/API integration, observability and scheduled evaluation, deployment hardening, and eventually representative validation once the real corpus, reviewed evaluation set, and provider credentials are available. No later phase should promote fixture-only Phase 12 differences into benchmark claims.
