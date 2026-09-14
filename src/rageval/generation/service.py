@@ -21,6 +21,7 @@ class RetrievalServiceLike(Protocol):
         query: str,
         *,
         filters: HybridSearchFilter | None = None,
+        top_k: int | None = None,
     ) -> RetrievalServiceResponse: ...
 
 
@@ -43,6 +44,7 @@ class GroundedGenerationService:
         question: str,
         *,
         filters: HybridSearchFilter | None = None,
+        top_k: int | None = None,
     ) -> GroundedGenerationResponse:
         normalized = " ".join(question.split())
         if not normalized:
@@ -80,7 +82,11 @@ class GroundedGenerationService:
                 total_latency_ms=(time.perf_counter() - start) * 1000.0,
             )
 
-        retrieval = await self.retrieval_service.search(normalized, filters=filters)
+        retrieval = await self.retrieval_service.search(
+            normalized,
+            filters=filters,
+            top_k=top_k,
+        )
         generated = await self.engine.generate(question, retrieval.final_context)
         answer = generated.answer.model_copy(
             update={
