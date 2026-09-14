@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import SecretStr, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,6 +34,16 @@ class Settings(BaseSettings):
     generation_provider: Literal["fake", "openai", "anthropic", "local"] = "fake"
     tracing_provider: Literal["disabled", "langfuse"] = "disabled"
     experiment_provider: Literal["disabled", "wandb"] = "disabled"
+
+    serving_api_key: SecretStr | None = None
+    serving_request_timeout_seconds: float = Field(default=30.0, gt=0.0, le=300.0)
+    serving_max_request_bytes: int = Field(default=65_536, ge=1_024, le=10_000_000)
+    serving_query_concurrency: int = Field(default=16, ge=1, le=256)
+    serving_eval_job_concurrency: int = Field(default=1, ge=1, le=16)
+    serving_eval_queue_size: int = Field(default=8, ge=1, le=1_000)
+    serving_cache_ttl_seconds: int = Field(default=300, ge=1, le=86_400)
+    serving_expose_retrieval_diagnostics: bool = False
+    serving_stream_chunk_chars: int = Field(default=256, ge=1, le=8_192)
 
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
