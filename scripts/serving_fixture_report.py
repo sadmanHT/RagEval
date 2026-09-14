@@ -260,6 +260,7 @@ async def _report() -> dict[str, object]:
             update={"index_fingerprint": hashlib.sha256(b"phase13-changed-index").hexdigest()}
         )
         changed_cache = RedisQueryCache.from_url("redis://localhost:6379/0")
+        await changed_cache.client.delete(build_query_cache_key(query_payload, changed_identity))
         changed_app = create_app(
             dependencies=ServingDependencies(
                 query_service=service,
