@@ -87,7 +87,7 @@ class LangfuseTraceSink:
             self._client = client
             return
         module = importlib.import_module("langfuse")
-        client_type = cast(Any, getattr(module, "Langfuse"))
+        client_type = cast(Any, vars(module)["Langfuse"])
         self._client = cast(
             _LangfuseClient,
             client_type(
