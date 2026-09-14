@@ -50,11 +50,7 @@ def extract_claims(answer: GroundedAnswer) -> tuple[str, ...]:
     if answer.insufficient_context:
         return ()
     cited_claims = tuple(
-        dict.fromkeys(
-            citation.claim.strip()
-            for citation in answer.citations
-            if citation.claim.strip()
-        )
+        dict.fromkeys(citation.claim.strip() for citation in answer.citations if citation.claim.strip())
     )
     if cited_claims:
         return cited_claims
@@ -62,11 +58,7 @@ def extract_claims(answer: GroundedAnswer) -> tuple[str, ...]:
     if not stripped:
         return ()
     claims = tuple(
-        dict.fromkeys(
-            part.strip()
-            for part in _SENTENCE_SPLIT_RE.split(stripped)
-            if part.strip()
-        )
+        dict.fromkeys(part.strip() for part in _SENTENCE_SPLIT_RE.split(stripped) if part.strip())
     )
     return claims
 
