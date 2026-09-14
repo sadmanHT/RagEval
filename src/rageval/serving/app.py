@@ -224,10 +224,15 @@ def create_app(
 
     @app.exception_handler(Exception)
     async def unhandled_error(request: Request, exc: Exception) -> JSONResponse:
-        logger.exception(
+        logger.error(
             "unhandled serving error",
-            exc_info=exc,
-            extra={"context": {"request_id": _request_id(request), "path": request.url.path}},
+            extra={
+                "context": {
+                    "request_id": _request_id(request),
+                    "path": request.url.path,
+                    "exception_type": type(exc).__name__,
+                }
+            },
         )
         return _safe_json_error(
             _request_id(request),
