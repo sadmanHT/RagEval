@@ -20,7 +20,7 @@ from rageval.evaluation import (
     RetrievalPipeline,
 )
 from rageval.generation import GroundedGenerationResponse, RetrievalRouteDecision
-from rageval.models import Citation, GroundedAnswer
+from rageval.models import Citation, Domain, GroundedAnswer
 from rageval.retrieval.hybrid.models import HybridSearchFilter
 from rageval.serving import (
     MemoryQueryCache,
@@ -166,11 +166,10 @@ def _app(
 
 
 def test_openapi_auth_and_query_contract() -> None:
-    app = _app()
+    service = RecordingQueryService()
+    app = _app(service)
     schema = app.openapi()
-    assert {"/query", "/eval/run", "/eval/jobs/{job_id}", "/eval/latest"} <= set(
-        schema["paths"]
-    )
+    assert {"/query", "/eval/run", "/eval/jobs/{job_id}", "/eval/latest"} <= set(schema["paths"])
 
     with TestClient(app) as client:
         assert client.post("/query", json={"question": "What?"}).status_code == 401
@@ -190,6 +189,9 @@ def test_openapi_auth_and_query_contract() -> None:
     assert payload["request_id"] == "request-1234"
     assert payload["cited_chunk_ids"] == ["chk_phase13_fixture"]
     assert response.headers["x-request-id"] == "request-1234"
+    assert service.last_top_k == 3
+    assert service.last_filters is not None
+    assert service.last_filters.domain is Domain.LEGAL
 
 
 def test_cache_hit_and_stream_final_event_preserve_citations() -> None:
