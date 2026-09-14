@@ -123,8 +123,9 @@ def test_metrics_trace_security_headers_and_exact_cors() -> None:
     assert "rageval_generation_tokens_total" in metrics.text
     query_records = [record for record in sink.records if record.kind == "query"]
     assert len(query_records) == 2
-    assert all(record.query is not None for record in query_records)
-    assert all(record.query.query_text is None for record in query_records if record.query is not None)
+    for record in query_records:
+        assert record.query is not None
+        assert record.query.query_text is None
 
 
 def test_rate_limit_header_abuse_default_cors_and_degraded_dependency_metrics() -> None:
