@@ -1,40 +1,128 @@
 # RAG-Eval
 
-RAG-Eval is a production-oriented Retrieval-Augmented Generation system whose primary goal is to make retrieval and generation quality measurable, reproducible, and debuggable.
+<p align="center">
+  <strong>Evaluation-first Retrieval-Augmented Generation, built as an engineering system rather than a demo.</strong>
+</p>
 
-## Current status
+<p align="center">
+  <a href="https://github.com/sadmanHT/RagEval/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/sadmanHT/RagEval/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/sadmanHT/RagEval/actions/workflows/frontend.yml"><img alt="Frontend CI" src="https://github.com/sadmanHT/RagEval/actions/workflows/frontend.yml/badge.svg"></a>
+  <a href="https://github.com/sadmanHT/RagEval/releases/tag/v0.1.0"><img alt="Release" src="https://img.shields.io/badge/release-v0.1.0-111111"></a>
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-2563EB">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-16A34A">
+</p>
 
-Phases 1–15 are merged and verified on `main`. The pipeline now covers repository/quality foundations, deterministic corpus governance, normalized PDF/DOCX/HTML loading with explicit OCR fallback, provenance-preserving cleaning, interchangeable chunking, reproducible dense Qdrant retrieval, deterministic BM25/BM25+ sparse retrieval, RRF hybrid fusion, a reranked retrieval-service layer with bounded multi-hop over the same canonical chunk identities, provider-abstracted grounded generation with deterministic context assembly/citation validation/refusal, leakage-aware evaluation dataset/metric/judge contracts, a resumable comparative-evaluation runner with configuration matrices/regression policies/experiment tracking/reporting/failure analysis, a typed async FastAPI serving boundary, sanitized operational tracing, low-cardinality Prometheus metrics, provisioned Grafana dashboards, containerized operational smoke/outage testing, scheduled evaluation semantics, dependency/secret scanning, serving abuse/security controls, and a final adversarial full-system acceptance/release-evidence layer. The remaining engineering work is production deployment/platform hardening and representative validation when the real corpus/evaluation set and required provider credentials are available.
+RAG-Eval is a production-oriented RAG platform for **financial reports, legal contracts, and research documents**. It treats retrieval quality, grounding, evaluation, observability, serving, and failure recovery as first-class parts of the system.
 
-Phase 6 dense retrieval consumes canonical Phase 5 chunks, embeds them behind a replaceable provider boundary, preserves stable chunk/configuration/provenance identity in reconstructable Qdrant payloads, and returns the canonical `RetrievalResult` contract. The deterministic/local acceptance path uses a local hashed embedding adapter for mechanics and real-Qdrant integration only; live OpenAI embedding validation remains unrun without credentials.
+The project combines deterministic local acceptance with real infrastructure integrations so the mechanics can be verified without inventing production-quality claims. Hosted providers remain replaceable adapters rather than hard dependencies.
 
-Phase 7 sparse retrieval implements BM25/BM25+ with a conservative domain-aware tokenizer and stable filters, deterministic index/configuration fingerprints, snapshot integrity checks, and lexical diagnostics.
+<p align="center">
+  <img src="docs/assets/product-console.webp" alt="RAG-Eval product console" width="920">
+</p>
 
-Phase 8 composes dense and sparse retrieval concurrently and fuses their 1-based rankings with Reciprocal Rank Fusion using the reference default `k=60`. Dense and sparse raw scores remain independently auditable rather than being normalized or added. Optional query expansion is bounded, observable, provider-abstracted, and cannot remove the original query.
+## Why this project is different
 
-Phase 9 consumes Phase 8 candidates through a provider-abstracted reranking engine and returns a default final top-5 context while preserving the nested original retrieval result, canonical IDs, provenance, pre/post rerank ranks, rerank score, provider/model identity, and configuration fingerprint. The hosted reference adapter targets Cohere Rerank with bounded timeout/retry/backoff behavior; deterministic acceptance uses a local fake reranker, and Cohere HTTP behavior is covered with mocked request/response, 429, and timeout tests. Live Cohere validation was not run without credentials, and no local neural cross-encoder is currently implemented.
+Most RAG examples stop at “embed documents, retrieve chunks, ask an LLM.” RAG-Eval goes further:
 
-The retrieval service also supports bounded multi-hop retrieval. Multi-hop is `off` by default, can be explicitly enabled, or can use a conservative rule planner that requires relationship cues plus an explicit section/clause/appendix/schedule reference. Every executed hop records its query, retrieval query, expansion state, candidate IDs, hybrid configuration fingerprint, and branch/total latency before merged candidates are reranked.
+| Area | What is implemented |
+| --- | --- |
+| Retrieval | Dense Qdrant retrieval, deterministic BM25/BM25+, concurrent hybrid retrieval, Reciprocal Rank Fusion, bounded query expansion, reranking, and bounded multi-hop retrieval |
+| Grounding | Deterministic context assembly, canonical chunk identities, citation validation, bounded repair, and explicit insufficient-context refusal |
+| Evaluation | Reviewed dataset contracts, leakage checks, context precision/recall, faithfulness, answer relevancy, hallucination accounting, resumable comparative runs, per-domain slices, regression policies, and report generation |
+| Serving | Typed async FastAPI API, API-key auth, Redis cache identity/invalidation, health/readiness endpoints, streaming citations, request limits, rate limiting, and bounded evaluation jobs |
+| Observability | Sanitized tracing, bounded-cardinality Prometheus metrics, provisioned Grafana dashboards, dependency readiness metrics, and outage drills |
+| Product UI | Thin Next.js console for grounded queries, citations/evidence, evaluation runs, and system health without duplicating RAG logic in JavaScript |
+| Delivery | Non-root Docker images, Compose stack, dependency/secret scans, frontend and backend CI, containerized end-to-end validation, and release evidence |
 
-Phase 10 consumes Phase 9 `final_context` directly. `ContextAssembler` deterministically orders reranked chunks, suppresses duplicates/near-duplicates, records chunk/source metadata, enforces a context budget, and fingerprints its behavior. Retrieved document text is rendered as untrusted context data rather than system instructions. Structured generation output is validated application-side: non-refusal citations must reference supplied canonical chunk IDs, malformed output or invalid citations may use a bounded auditable repair step, and insufficient-context responses must refuse without supporting citations.
+## Product surfaces
 
-The credential-free generation acceptance path uses `DeterministicFakeGenerationProvider`. The hosted reference adapter targets OpenAI and implements bounded timeout/retry/backoff plus strict structured response/usage parsing; its HTTP behavior is covered with deterministic mocked 429 and timeout tests. No live OpenAI generation is claimed without credentials. `AlwaysRetrieveRouter` is the default; an opt-in conservative Self-RAG-style router exposes its decision, and any no-retrieval route currently refuses rather than emitting an ungrounded answer under the same grounded-answer guarantee.
+The frontend is intentionally thin: browser code calls same-origin Next.js route handlers, and server-side handlers attach the backend API key. Retrieval, generation, evaluation, authentication policy, and corpus logic stay in Python.
 
-Phase 11 finalizes held-out evaluation-example governance, strict JSONL/review tooling, corpus-fingerprint and held-out document leakage checks, canonical chunk-ID context precision/recall, structured provider-abstracted judge contracts, deterministic rule/scripted judges, claim-level faithfulness, answer relevancy, and response-level hallucination defined strictly as `faithfulness < 0.8`. Evaluation runs carry deterministic dataset/config/run fingerprints, and hallucination output persists the flagged count, total count, threshold, and arithmetically validated `count / N` rate.
+<table>
+  <tr>
+    <td width="50%"><img src="docs/assets/product-console.webp" alt="RAG-Eval query, evidence, evaluation, and health console"></td>
+    <td width="50%"><img src="docs/assets/grafana-dashboard.webp" alt="RAG-Eval Grafana operational dashboard"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Product console</strong><br>Query → grounded answer → citations → evaluation → system health</td>
+    <td align="center"><strong>Operational dashboard</strong><br>Request rate, latency, cache, queue, provider failures, and dependency readiness</td>
+  </tr>
+</table>
 
-Phase 12 consumes those contracts through `AsyncEvaluationRunner`: bounded concurrency, retries/backoff, atomic per-example checkpoints/resume, deterministic configuration/matrix/run fingerprints, overall and financial/legal/research metric slices with sample counts, the required failure taxonomy, PR-fast versus nightly regression semantics, reuse of the existing experiment-tracker abstraction, credential-free local JSON tracking, optional W&B, and JSON/Markdown/HTML comparative reports. The permanent CI fixture runs five distinct configurations across fixed-256/512/1024, semantic, and table-aware chunk labels with query-expansion/multi-hop toggles, but the resulting differences are mechanics fixtures only and are not used to select a production strategy.
+## Architecture
 
-Phase 13 exposes the canonical Phase 9–12 retrieval/generation/evaluation stack rather than rebuilding it behind HTTP. `/query` supports typed question/domain/filter/`top_k` options, API-key authentication, request IDs, body/time/concurrency limits, grounded cited answers, optional retrieval diagnostics, correctness-scoped Redis caching, and NDJSON transport streaming with a final structured citation event. `/health/live` and `/health/ready` separate process liveness from dependency readiness. `/eval/run`, `/eval/jobs/{job_id}`, and `/eval/latest` use a fixed-worker bounded in-process queue. Unexpected request, streaming, and evaluation-worker failures return safe generic errors and do not log arbitrary downstream exception strings. The real-local acceptance path uses Qdrant + Redis with deterministic providers and is explicitly mechanics/grounding/traceability evidence, not a production serving benchmark.
+```mermaid
+flowchart LR
+    A[PDF / DOCX / HTML] --> B[Ingestion + OCR fallback]
+    B --> C[Cleaning + provenance]
+    C --> D[Chunking]
+    D --> E[Dense / Qdrant]
+    D --> F[Sparse / BM25+]
+    E --> G[Hybrid RRF]
+    F --> G
+    G --> H[Reranking + bounded multi-hop]
+    H --> I[Retrieval Service]
+    I --> J[Grounded Generation]
+    J --> K[FastAPI]
+    K --> L[Next.js Console]
+    K --> M[Redis]
+    I --> N[Evaluation Runner]
+    J --> N
+    K --> O[Prometheus]
+    O --> P[Grafana]
+```
 
-Phase 14 instruments that same serving/evaluation boundary rather than creating a parallel operational path. Query/evaluation traces are Langfuse-compatible and sanitized by construction: raw document/context text is never exported, raw query text is off by default, and rank/RRF/rerank/context/citation/provider/token/latency evidence remains observable. Prometheus exposes bounded-cardinality request/error/stage/cache/provider/token/cost/evaluation/dependency metrics, Grafana is provisioned from source control, and drift hooks retain bounded query-length/embedding-norm aggregates with explicit insufficient-data handling. The runtime image is non-root, the Compose stack covers API/Qdrant/Redis/Prometheus/Grafana, PR CI builds and tests the stack from clean volumes, the full repository suite runs inside the Tesseract-enabled test image, and an actual Qdrant outage must produce readiness degradation plus a dependency metric. PR-fast evaluation remains a pre-merge blocker while scheduled/manual evaluation is alert/report-only. Dependency auditing, secret scanning, Dependabot, exact-origin CORS defaults, bounded security headers, response hardening, and a hashed per-process rate limiter complete the Phase 14 operational baseline.
+A core design constraint is that each phase consumes and preserves the same canonical document/chunk identities. Retrieval diagnostics, rerank decisions, context assembly, citations, evaluation records, cache identity, and traces can therefore be connected back to the same source provenance.
 
-Phase 15 validates the same canonical system end to end rather than introducing a second retrieval/generation path. Its deterministic release runner exercises financial/legal/research queries, table-aware retrieval, query expansion, bounded multi-hop, explicit refusal, mocked provider retry/timeout, Self-RAG routing invariants, checkpoint resume, index rebuild, cache invalidation, modest concurrency, redacted tracing/metrics, and installed-Tesseract OCR. The dedicated release-validation job stores machine-readable full-system and five-configuration reconciliation artifacts. Local benchmark samples are measured at runtime and labeled fixture-only; they are not production SLOs. The three-record reviewed fixture produces domain-level ties rather than a defensible production chunking winner, so no strategy is promoted from the tiny set.
+## What has actually been validated
 
-The target roughly 200-question evaluation set and representative roughly 12,000-document corpus are not present and were not fabricated. Phase 11/12 deterministic acceptance uses three reviewed synthetic financial/legal/research records, Phase 13 serving acceptance uses the committed four-document/six-chunk fixture path, Phase 14 adds deterministic operational/container fixtures, and Phase 15 adds adversarial connected-system/release fixtures rather than representative workloads. The lexical rule judge, optional injected-scorer RAGAS adapter, deterministic observation/serving providers, local operational stack, and Phase 15 release harness validate measurement/orchestration/schema/arithmetic/serving/resilience/release mechanics only; no live LLM judge, actual RAGAS-backed semantic result, representative ablation winner, hosted-provider quality result, production load/SLO/cost result, or statistically significant drift result is claimed.
+RAG-Eval deliberately separates **mechanics evidence** from **representative quality evidence**.
 
-The small committed fixtures verify mechanics, provenance, deterministic ordering, retry/error handling, top-5 orchestration, two-hop recovery, context budgeting, citation traceability, bounded repair, prompt-boundary behavior, explicit refusal, metric arithmetic, judge schema auditing, run fingerprinting, resumable evaluation, regression semantics, report generation, failure classification, authenticated serving, cache identity/invalidation, streaming citation preservation, readiness degradation/recovery, bounded evaluation jobs, sanitized telemetry, metric-cardinality controls, non-root container execution, clean-stack startup, security scanning, dependency-outage observability, and release-artifact provenance rather than production retrieval/generation/evaluation quality. No neural-reranking quality, hosted-model answer quality, target-corpus retrieval improvement, representative faithfulness/hallucination/answer-relevancy score, production ablation winner, production load result, or production latency/cost benchmark is claimed from these fixtures.
+| Evidence | Current status |
+| --- | --- |
+| Connected-system release scenarios | **15 / 15 passed** on the deterministic/adversarial fixture path |
+| Local infrastructure | Real Qdrant + Redis exercised in integration and serving validation |
+| OCR | Real local Tesseract path validated in the container tier |
+| Grounding | Answerable queries preserve canonical citations; unsupported queries refuse with zero citations |
+| Resumability | Evaluation checkpoints resume without re-producing completed examples |
+| Recovery | Qdrant outage produces readiness degradation and dependency metrics; restart restores readiness |
+| Container security | Runtime executes non-root with reduced capabilities/read-only filesystem constraints |
+| Product UI | Production build, TypeScript check, dependency/secret scan, Compose smoke, and non-root frontend runtime in CI |
+| Release | `v0.1.0` published from the validated release path |
 
-## Quick start
+The committed fixtures are intentionally small. They prove orchestration, provenance, arithmetic, failure handling, serving, observability, and release mechanics. They **do not** justify a production retrieval winner, production hallucination rate, hosted-model quality claim, or production SLO.
+
+The target ~12,000-document representative corpus, ~200-question reviewed evaluation set, and live provider credentials are not stored in this repository and are not fabricated.
+
+## Quick start: run the product
+
+Requirements: Docker + Docker Compose.
+
+```bash
+git clone https://github.com/sadmanHT/RagEval.git
+cd RagEval
+
+export RAGEVAL_SERVING_API_KEY=replace-this-local-key
+docker compose up -d --build qdrant redis api frontend prometheus grafana
+```
+
+Then open:
+
+- **Product console:** http://localhost:3001
+- **FastAPI / Swagger:** http://localhost:8000/docs
+- **Grafana:** http://localhost:3000
+- **Prometheus:** http://localhost:9090
+
+To exercise the operational path and tear it down cleanly:
+
+```bash
+make ops-smoke
+make ops-down
+```
+
+For frontend-only development, see [`docs/frontend.md`](docs/frontend.md).
+
+## Developer setup
 
 ```bash
 python -m venv .venv
@@ -42,146 +130,87 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 pip install -e '.[dev]'
 cp .env.example .env
+
 make verify
 make integration
-make dense-report
-make sparse-report
-make hybrid-report
-make retrieval-report
-make generation-report
-make evaluation-report
-make evaluation-gate
-make evaluation-ablation-report
-make serving-report
+```
+
+Useful validation targets:
+
+```bash
 make full-validation
 make release-evaluation
-make smoke
-```
-
-Start and verify the operational stack:
-
-```bash
-export RAGEVAL_SERVING_API_KEY=replace-this-local-key
-make docker-build
-make ops-smoke
 make container-test
-make ops-down
+make frontend-build
 ```
 
-See `docs/operations.md` for Prometheus/Grafana, external Langfuse, scheduled evaluation, outage drills, security boundaries, and recovery guidance. See `docs/phases/phase-15-report.md` for the final connected-system acceptance evidence and its limitations.
+The deterministic acceptance path can run without OpenAI/Cohere credentials. Live-provider checks are an additional validation tier.
 
-Inspect a corpus without parsing document contents:
+## API surface
 
-```bash
-python -m rageval.corpus.cli scan ./data/raw --output ./data/corpus-manifest.json
-python -m rageval.corpus.cli validate ./data/corpus-manifest.json --root ./data/raw
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /query` | Grounded query with optional domain/filter/top-k controls and retrieval diagnostics |
+| `GET /health/live` | Process liveness |
+| `GET /health/ready` | Dependency readiness |
+| `POST /eval/run` | Submit an evaluation job |
+| `GET /eval/jobs/{job_id}` | Inspect evaluation-job state |
+| `GET /eval/latest` | Fetch the latest aggregate evaluation summary |
+| `GET /metrics` | Prometheus metrics |
+
+`/query` also supports NDJSON streaming while preserving a final structured citation event.
+
+## Engineering highlights
+
+- **Provenance-first ingestion:** normalized PDF/DOCX/HTML parsing, explicit OCR fallback, conservative cleaning, and stable source metadata.
+- **Composable retrieval:** dense and sparse indexes share canonical chunk identities; RRF combines ranks instead of naïvely mixing incompatible raw scores.
+- **Auditable reranking:** post-rank results preserve original dense/sparse/RRF evidence and configuration fingerprints.
+- **Bounded multi-hop:** optional second-hop retrieval records each hop and reuses the same canonical indexes instead of introducing a parallel path.
+- **Grounded-by-construction responses:** retrieved content is treated as untrusted context, citations must reference supplied chunk IDs, and insufficient context produces refusal rather than an ungrounded answer.
+- **Evaluation as a product feature:** resumable runs, deterministic fingerprints, per-domain summaries, failure taxonomy, regression gates, local JSON tracking, optional W&B, and machine-readable reports.
+- **Operational safety:** raw document/context text is never exported in traces; raw query text is off by default; metrics use bounded cardinality.
+- **Security-conscious serving:** API-key authentication, body/time/concurrency limits, exact-origin CORS defaults, safe errors, security headers, and rate limiting.
+- **Thin frontend boundary:** the browser never receives the FastAPI API key; the Next.js server proxies authenticated backend calls.
+
+## Tech stack
+
+**Backend:** Python 3.11+, FastAPI, Pydantic, Qdrant, Redis, httpx  
+**Retrieval:** local/provider embeddings behind protocols, BM25/BM25+, RRF, reranking, multi-hop  
+**Frontend:** Next.js 16, React 19, TypeScript  
+**Observability:** Prometheus, Grafana, Langfuse-compatible tracing  
+**Quality:** pytest, mypy strict mode, Ruff, pip-audit, detect-secrets  
+**Runtime:** Docker, Docker Compose, non-root hardened containers
+
+## Repository map
+
+```text
+src/rageval/        canonical Python implementation
+web/                thin Next.js product console
+tests/              unit + integration + operational coverage
+scripts/            deterministic evidence and validation runners
+ops/                Prometheus / Grafana configuration
+docs/               architecture, frontend, operations, phase evidence
+docker-compose.yml  local product + observability stack
 ```
 
-Parse one source into normalized debug JSON without indexing:
+## Documentation
 
-```bash
-python -m rageval.ingestion.cli file ./data/raw/development/financial/report.pdf \
-  --domain financial --output ./tmp/report.elements.json
-```
+- [`docs/implementation-state.md`](docs/implementation-state.md) — detailed implementation and evidence state
+- [`docs/architecture-decisions.md`](docs/architecture-decisions.md) — architectural decisions and constraints
+- [`docs/frontend.md`](docs/frontend.md) — frontend security boundary, local development, CI, and container model
+- [`docs/operations.md`](docs/operations.md) — observability, outage drills, recovery, scheduled evaluation, and security boundaries
+- [`docs/phases/phase-15-report.md`](docs/phases/phase-15-report.md) — final connected-system validation and evidence limitations
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contributor workflow
 
-Parse a manifest subset:
+## Current scope and next steps
 
-```bash
-python -m rageval.ingestion.cli corpus ./data/corpus-manifest.json \
-  --root ./data/raw --output-dir ./tmp/elements --split development
-```
+The repository is release-ready for its deterministic/local acceptance contract. The highest-value next steps are environment-specific rather than another parallel RAG implementation:
 
-Parse, clean, and chunk one source without indexing:
+1. Validate against the representative ~12k document corpus and ~200 reviewed questions.
+2. Run the hosted provider tier with real credentials and persist comparable evidence.
+3. Establish production load, latency, cost, and drift baselines in the deployment environment.
+4. Deploy the existing API/frontend/observability stack behind production platform controls.
 
-```bash
-python -m rageval.chunking.cli ./data/raw/development/financial/report.pdf \
-  --domain financial --strategy fixed_512 --output ./tmp/report.chunks.json
-```
+## License
 
-For offline semantic mechanics/debugging, the Phase 5 semantic CLI uses the deterministic local hashed embedding adapter rather than claiming a hosted or learned semantic-model result:
-
-```bash
-python -m rageval.chunking.cli ./data/raw/evaluation/research/paper.html \
-  --domain research --strategy semantic --output ./tmp/paper.semantic-chunks.json
-```
-
-Query a persisted sparse snapshot with lexical diagnostics:
-
-```bash
-python -m rageval.retrieval.sparse.cli ./tmp/sparse-index.json "Section 7.4" \
-  --domain legal --top-k 20
-```
-
-Reproduce deterministic CI evidence:
-
-```bash
-python scripts/cleaning_fixture_report.py
-python scripts/chunking_fixture_report.py
-python scripts/dense_fixture_report.py
-python scripts/sparse_fixture_report.py
-python scripts/hybrid_fixture_report.py
-python scripts/retrieval_service_fixture_report.py
-python scripts/generation_fixture_report.py
-python scripts/evaluation_fixture_report.py
-python scripts/evaluation_gate.py --mode pr
-python scripts/evaluation_ablation_fixture_report.py
-python scripts/serving_fixture_report.py
-python scripts/full_system_validation.py
-python scripts/phase15_evaluation_reconciliation.py
-```
-
-The dense fixture report uses real local Qdrant; the sparse report validates deterministic BM25+ identity and exact-term retrieval; the hybrid report validates concurrent RRF mechanics and bounded expansion; the retrieval-service report validates top-5 reranking plus bounded two-hop recovery; the generation report validates retrieval-to-context-to-grounded-answer citation traceability plus explicit unsupported-question refusal; the evaluation report validates deterministic metric arithmetic, hallucination count/rate consistency, structured judge/version metadata, and dataset/config/run fingerprints; the Phase 12 ablation report validates resumable comparative-run mechanics, distinct configuration fingerprints, per-domain/sample-count aggregation, experiment tracking, failure classification, and JSON/Markdown/HTML reporting; the Phase 13 serving report validates authenticated query/evaluation HTTP contracts, real local Qdrant/Redis readiness, cache hit and index-fingerprint invalidation, bounded job completion, and final streaming citation preservation; the Phase 14 PR-fast gate validates pre-merge regression-policy mechanics; and the Phase 15 scripts validate connected-system/release-evidence mechanics against the committed fixtures. All use committed fixtures and emit machine-readable evidence.
-
-The Phase 9 fixture proves deterministic reranking can move a canonical candidate from pre-rerank rank 6 to post-rerank rank 1 while preserving the original retrieval/provenance object. Its multi-hop fixture proves a bounded second hop can recover a non-adjacent legal chunk while retaining both hop traces. These are mechanics fixtures, not retrieval-quality benchmarks.
-
-The Phase 10 fixture builds 6 canonical chunks from 4 committed source documents. Its answerable path cites a canonical chunk ID that is present in the exact supplied assembled context, and its intentionally unanswerable Europa question returns `insufficient_context=true` with zero citations. This proves structured grounding/refusal mechanics only; it does not establish semantic faithfulness or hosted-model quality.
-
-The Phase 11 fixture evaluates 3 reviewed synthetic records. It computes one flagged response out of three at the strict `faithfulness < 0.8` threshold and persists the rate as `1 / 3`; these numbers are mechanics/arithmetic evidence only and are not a production hallucination-rate estimate.
-
-The Phase 12 fixture evaluates the same 3 reviewed synthetic records under 5 deliberately distinct configurations. It verifies that summaries are recomputed from per-example records and that each configuration has distinct run/configuration identity. It is explicitly labeled `deterministic-fixture-ablation-mechanics-only` and does not establish a preferred chunker, retrieval architecture, expansion policy, or multi-hop policy.
-
-The Phase 13 fixture builds 6 canonical chunks from 4 committed source documents behind real local Qdrant and Redis. It verifies authenticated cited query responses, readiness, cache reuse, cache invalidation after index identity changes, final streaming citations, and evaluation-job completion. It is labeled `phase13-serving-fixture-mechanics-only` and does not establish hosted-provider quality, production scale, or SLO performance.
-
-The Phase 14 operational fixture starts API/Qdrant/Redis/Prometheus/Grafana from clean volumes, verifies an authenticated cited query and evaluation job, checks `/metrics`, Prometheus scraping and Grafana health, runs the cumulative suite in a Tesseract-enabled container, and then stops Qdrant to prove HTTP 503 readiness plus `rageval_dependency_ready{component="qdrant"} 0.0`. It is labeled `phase14-container-operational-mechanics-only` and is not a production load or quality benchmark.
-
-The Phase 15 release fixture uses 4 committed source documents / 6 canonical chunks and passes 15 named deterministic/adversarial scenarios. Its primary CI artifact records eight cold and eight warm samples plus a 12-request modest-concurrency run, but those measurements are runner-local fixture evidence, not production performance targets. The available reviewed set has three records, not the target roughly 200, and its five-configuration reconciliation intentionally leaves tied fixture-local strategies unresolved rather than selecting a production winner.
-
-The corpus layout is `<root>/<development|evaluation>/<financial|legal|research>/<file>`.
-Supported discovery/parsing formats are PDF, DOCX, HTML, and HTM.
-
-## Architecture principles
-
-- Hosted services are adapters behind explicit protocols, never hard-wired dependencies.
-- Deterministic tests are the acceptance baseline; live-provider checks are an additional tier.
-- Benchmark and evaluation numbers must come from actual runs, never from documentation constants.
-- Evaluation sources must remain held out by identity and checksum, including renamed duplicates.
-- Parser libraries never leak raw objects beyond the ingestion boundary.
-- OCR fallback is explicit, configurable, observable, and separately validated with a real local Tesseract path.
-- Cleaning is configuration-fingerprinted, auditable, and conservative about deleting repeated answer-bearing body content.
-- Chunking consumes cleaned elements, preserves table/source provenance, and fingerprints every behavior-affecting configuration.
-- Dense indexing preserves canonical chunk IDs/configuration/provenance, validates collection schemas before reuse, and keeps external embeddings behind replaceable providers.
-- Sparse indexing preserves the same canonical chunk identity, fingerprints scoring/tokenization behavior, and keeps filter semantics explicit rather than rebuilding corpus statistics per query.
-- Hybrid retrieval fuses dense and sparse **ranks** by canonical identity with deterministic RRF; incompatible raw score spaces remain diagnostics rather than being naïvely combined.
-- Query expansion is optional, bounded, observable, provider-abstracted, and cannot remove the original query.
-- Reranking wraps canonical retrieval results instead of replacing them, so dense/sparse/RRF/expansion evidence remains auditable after post-ranking.
-- Multi-hop is bounded and off by default; every executed hop must be traceable and later evaluation must justify broader automatic triggering.
-- Grounded generation consumes the canonical reranked context instead of reconstructing retrieval evidence through a parallel path.
-- Retrieved document instructions are untrusted data, not system instructions; application-side structured-output and citation validation remains mandatory.
-- Generated citations are accepted only when their canonical chunk IDs exist in the context supplied to generation; semantic entailment is a separate evaluation concern.
-- Insufficient-context cases must refuse explicitly rather than silently filling gaps with unsupported external knowledge.
-- Repair of malformed structured output/citations is bounded and observable; exhaustion fails closed.
-- Self-RAG-style routing is observable and retrieval remains the default for domain questions; no-retrieval routes must not silently claim the same faithfulness guarantee.
-- Evaluation metric/judge/run contracts must remain versioned and fingerprinted; headline scores must be derived from actual per-example records.
-- Hallucination-rate output must retain its numerator and denominator; an independently typed percentage is not accepted as evidence.
-- Comparative evaluation must retain dataset/configuration/corpus identities, sample counts, and per-example records; fixture-only differences must not be promoted into production recommendations.
-- PR-fast regression gates and nightly/full regression alerts are distinct semantics; post-merge nightly checks are not represented as pre-merge blockers.
-- Serving must preserve the canonical retrieval/generation/evaluation contracts, authenticate callers, bound expensive concurrency, and version cache identity with every answer-affecting artifact.
-- Streaming must preserve a final structured citation/refusal contract; transport streaming is not represented as provider-native token streaming.
-- Generic serving failures must not expose or log arbitrary downstream exception strings that may contain credentials.
-- Operational traces must prefer identifiers, fingerprints, ranks, aggregate metadata, and configured redaction over raw document/context content.
-- Metric labels must remain bounded; request/job/document/chunk identifiers and user text are not acceptable Prometheus labels.
-- Drift indicators are heuristic aggregate signals and must report insufficient-data states rather than claiming significance from tiny samples.
-- PR blockers must execute before merge; scheduled/post-merge evaluation is alert/report semantics, not retroactive merge blocking.
-- Deterministic/local providers and tiny fixtures validate mechanics, not learned semantic quality, hosted-model answer quality, or production retrieval/generation/evaluation quality.
-- No chunking, retrieval, routing, generation, evaluation, serving, operational, or release strategy is considered preferable without representative evaluation evidence.
-- Every phase must pass its own tests and the cumulative regression suite before completion.
+MIT — see [`LICENSE`](LICENSE).
