@@ -2,6 +2,7 @@
 .PHONY: dense-report sparse-report hybrid-report retrieval-report generation-report evaluation-report
 .PHONY: evaluation-ablation-report serving-report evaluation-gate full-validation release-evaluation
 .PHONY: test smoke ci docker-build docker-test-image ops-up ops-down ops-smoke container-test
+.PHONY: frontend-install frontend-dev frontend-build frontend-smoke
 
 install:
 	python -m pip install -e '.[dev]'
@@ -71,14 +72,27 @@ docker-build:
 docker-test-image:
 	docker build --target test -t rageval-test:local .
 
+frontend-install:
+	cd web && npm install --no-audit --no-fund
+
+frontend-dev:
+	cd web && npm run dev
+
+frontend-build:
+	cd web && npm run typecheck && npm run build
+
+frontend-smoke:
+	python scripts/frontend_smoke.py
+
 ops-up:
-	docker compose up -d --build qdrant redis api prometheus grafana
+	docker compose up -d --build qdrant redis api frontend prometheus grafana
 
 ops-down:
 	docker compose down -v --remove-orphans
 
 ops-smoke: ops-up
 	python scripts/operational_smoke.py
+	python scripts/frontend_smoke.py
 
 container-test: docker-test-image compose-up
 	docker run --rm --network host rageval-test:local pytest -q
