@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./light-theme.css";
 
 export const metadata: Metadata = {
   title: "RAG-Eval Console",
