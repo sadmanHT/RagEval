@@ -53,6 +53,37 @@ services:
       - ALL
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./web
+    environment:
+      RAGEVAL_API_URL: http://api:8000
+      RAGEVAL_API_KEY: ${RAGEVAL_SERVING_API_KEY:-local-compose-change-me}
+    ports:
+      - "3001:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:v2.55.1
     command:
