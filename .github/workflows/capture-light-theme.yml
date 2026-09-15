@@ -1,0 +1,39 @@
+name: Capture light frontend visual
+
+on:
+  push:
+    branches:
+      - frontend-light-theme-visual-check
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start product stack
+        env:
+          RAGEVAL_SERVING_API_KEY: visual-check-local-key  # pragma: allowlist secret
+        run: |
+          docker compose down -v --remove-orphans
+          docker compose up -d --build qdrant redis api frontend
+          python scripts/frontend_smoke.py
+      - name: Install Chromium capture tool
+        run: |
+          npm install --global playwright@1.55.0
+          playwright install --with-deps chromium
+      - name: Capture full console
+        run: |
+          mkdir -p artifacts/frontend-light-theme
+          playwright screenshot --browser=chromium --viewport-size="1440,1200" --full-page http://127.0.0.1:3001 artifacts/frontend-light-theme/rageval-console-light.png
+      - name: Upload capture
+        uses: actions/upload-artifact@v4
+        with:
+          name: rageval-frontend-light-theme
+          path: artifacts/frontend-light-theme/rageval-console-light.png
+          retention-days: 7
+      - name: Tear down
+        if: always()
+        run: docker compose down -v --remove-orphans
