@@ -1,0 +1,75 @@
+name: Capture portfolio screenshot
+
+on:
+  push:
+    branches:
+      - portfolio-professional-pass
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start product stack
+        env:
+          RAGEVAL_SERVING_API_KEY: portfolio-capture-local-key  # pragma: allowlist secret
+        run: docker compose up -d --build qdrant redis api frontend
+      - name: Wait for frontend readiness
+        run: |
+          python - <<'PY'
+          import json
+          import time
+          import urllib.request
+
+          deadline = time.time() + 180
+          last = None
+          while time.time() < deadline:
+              try:
+                  with urllib.request.urlopen('http://127.0.0.1:3001/api/health', timeout=5) as response:
+                      payload = json.load(response)
+                  last = payload
+                  if payload.get('status') == 'ok':
+                      print('frontend proxy reports healthy readiness')
+                      break
+              except Exception as exc:
+                  last = repr(exc)
+              time.sleep(2)
+          else:
+              raise SystemExit(f'frontend did not become ready: {last!r}')
+          PY
+      - name: Install browser capture dependencies
+        run: |
+          mkdir -p /tmp/rageval-capture
+          cd /tmp/rageval-capture
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Capture healthy product console
+        run: |
+          cat > /tmp/rageval-capture/capture.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 1440, height: 1050 }, deviceScaleFactor: 1 });
+          await page.goto('http://127.0.0.1:3001', { waitUntil: 'networkidle' });
+          await page.getByText('System healthy').waitFor({ state: 'visible', timeout: 120000 });
+          await page.getByText('All systems nominal').waitFor({ state: 'visible', timeout: 120000 });
+          await page.screenshot({ path: 'rageval-console-healthy.png', fullPage: true });
+          await browser.close();
+          JS
+          cd /tmp/rageval-capture
+          node capture.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rageval-portfolio-healthy
+          path: /tmp/rageval-capture/rageval-console-healthy.png
+          if-no-files-found: error
+          retention-days: 7
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Tear down
+        if: always()
+        run: docker compose down -v --remove-orphans
