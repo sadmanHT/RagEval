@@ -28,6 +28,28 @@ jobs:
         run: npm run build
       - name: Production dependency audit
         run: npm audit --omit=dev --audit-level=high
+      - name: Secret scan frontend surfaces
+        run: |
+          python -m pip install 'detect-secrets>=1.5,<2'
+          detect-secrets scan . ../scripts/frontend_smoke.py \
+            ../.github/workflows/frontend.yml ../docker-compose.yml \
+            > /tmp/frontend-detect-secrets.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/frontend-detect-secrets.json').read_text())
+          results = payload.get('results', {})
+          if results:
+              for path, findings in sorted(results.items()):
+                  for finding in findings:
+                      print(
+                          f"secret candidate: {path}:{finding.get('line_number')} "
+                          f"{finding.get('type')}"
+                      )
+              raise SystemExit('detect-secrets found unreviewed frontend candidates')
+          print('detect-secrets: no frontend candidates')
+          PY
 
   frontend-e2e:
     runs-on: ubuntu-latest
