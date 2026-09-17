@@ -1,0 +1,63 @@
+name: Feature request
+description: Propose a focused improvement to the existing RAG-Eval architecture
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        RAG-Eval prefers extensions to the canonical ingestion/retrieval/generation/evaluation/serving paths over parallel implementations. Please describe the user or engineering problem first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What limitation or workflow gap should this solve?
+      placeholder: Describe the concrete problem, not only the desired technology.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the smallest useful change and where it should integrate with the existing architecture.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Ingestion / OCR
+        - Retrieval / reranking
+        - Grounded generation / citations
+        - Evaluation
+        - Serving / API
+        - Frontend
+        - Observability / operations
+        - CI / containers / release
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance evidence
+      description: What tests, metrics, fixtures, or operational evidence would demonstrate that the change works?
+      placeholder: Unit/integration tests, deterministic fixture evidence, provider validation, latency evidence, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Tradeoffs or alternatives
+      description: Note important complexity, security, privacy, cost, or architecture implications.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Architecture checks
+      options:
+        - label: This proposal extends the canonical implementation rather than creating a duplicate retrieval/generation/evaluation path.
+          required: true
+        - label: Any quality or production claims will be backed by the appropriate evidence tier rather than inferred from small fixtures.
+          required: true
