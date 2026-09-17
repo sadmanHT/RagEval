@@ -1,0 +1,1 @@
+Healthy-state product and operational screenshots are maintained as repository assets referenced by the README. Capture evidence is produced from the running Compose stack; temporary capture automation is not part of the permanent product surface.
