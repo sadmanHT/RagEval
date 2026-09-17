@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/sadmanHT/RagEval/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/sadmanHT/RagEval/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/sadmanHT/RagEval/actions/workflows/frontend.yml"><img alt="Frontend CI" src="https://github.com/sadmanHT/RagEval/actions/workflows/frontend.yml/badge.svg"></a>
-  <a href="https://github.com/sadmanHT/RagEval/releases/tag/v0.1.0"><img alt="Release" src="https://img.shields.io/badge/release-v0.1.0-111111"></a>
+  <a href="https://github.com/sadmanHT/RagEval/releases/tag/v0.2.0"><img alt="Release" src="https://img.shields.io/badge/release-v0.2.0-111111"></a>
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-2563EB">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-16A34A">
 </p>
@@ -92,7 +92,7 @@ RAG-Eval deliberately separates **mechanics evidence** from **representative qua
 | Recovery | Qdrant outage produces readiness degradation and dependency metrics; restart restores readiness |
 | Container security | Runtime executes non-root with reduced capabilities/read-only filesystem constraints |
 | Product UI | Production build, TypeScript check, dependency/secret scan, Compose smoke, and non-root frontend runtime in CI |
-| Release | `v0.1.0` published from the validated release path |
+| Release | `v0.2.0` published after exact-head full CI and Frontend CI validation |
 
 The committed fixtures are intentionally small. They prove orchestration, provenance, arithmetic, failure handling, serving, observability, and release mechanics. They **do not** justify a production retrieval winner, production hallucination rate, hosted-model quality claim, or production SLO.
 
