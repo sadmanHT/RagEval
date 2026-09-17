@@ -20,6 +20,8 @@ The project combines deterministic local acceptance with real infrastructure int
   <img src="docs/assets/product-console.webp" alt="RAG-Eval product console" width="920">
 </p>
 
+> **Portfolio review:** start with the [`engineering case study`](docs/case-study.md) for the design decisions, tradeoffs, validation strategy, and production boundaries behind the implementation.
+
 ## Why this project is different
 
 Most RAG examples stop at “embed documents, retrieve chunks, ask an LLM.” RAG-Eval goes further:
@@ -48,6 +50,8 @@ The frontend is intentionally thin: browser code calls same-origin Next.js route
     <td align="center"><strong>Operational dashboard</strong><br>Request rate, latency, cache, queue, provider failures, and dependency readiness</td>
   </tr>
 </table>
+
+These are captures from the running local Compose stack after the product/operational smoke path, not design mockups.
 
 ## Architecture
 
@@ -195,11 +199,13 @@ docker-compose.yml  local product + observability stack
 
 ## Documentation
 
+- [`docs/case-study.md`](docs/case-study.md) — portfolio-oriented engineering narrative, design decisions, tradeoffs, and next steps
 - [`docs/implementation-state.md`](docs/implementation-state.md) — detailed implementation and evidence state
 - [`docs/architecture-decisions.md`](docs/architecture-decisions.md) — architectural decisions and constraints
 - [`docs/frontend.md`](docs/frontend.md) — frontend security boundary, local development, CI, and container model
 - [`docs/operations.md`](docs/operations.md) — observability, outage drills, recovery, scheduled evaluation, and security boundaries
 - [`docs/phases/phase-15-report.md`](docs/phases/phase-15-report.md) — final connected-system validation and evidence limitations
+- [`SECURITY.md`](SECURITY.md) — vulnerability reporting and explicit security boundaries
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — contributor workflow
 
 ## Current scope and next steps
