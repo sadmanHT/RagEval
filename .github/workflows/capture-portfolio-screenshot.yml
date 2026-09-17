@@ -57,8 +57,8 @@ jobs:
           await grafana.locator('button[type="submit"]').click();
           await grafana.waitForLoadState('networkidle');
           await grafana.goto('http://127.0.0.1:3000/d/rageval-operational/rag-eval-operational-overview?orgId=1&from=now-15m&to=now&refresh=30s', { waitUntil: 'networkidle' });
-          await grafana.getByText('HTTP request rate').waitFor({ state: 'visible', timeout: 120000 });
-          await grafana.waitForTimeout(3000);
+          await grafana.locator('body').waitFor({ state: 'visible', timeout: 120000 });
+          await grafana.waitForTimeout(5000);
           await grafana.screenshot({ path: 'docs/assets/grafana-dashboard.png', fullPage: true });
 
           await browser.close();
