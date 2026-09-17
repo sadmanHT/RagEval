@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a reproducible defect in RAG-Eval
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve RAG-Eval. Please use fake/sanitized data only and never include API keys or private document content.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the defect and the expected behavior.
+      placeholder: A concise description of the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Provide the smallest reproducible sequence, command, request, or fixture setup.
+      placeholder: Steps, commands, request body, or a minimal fixture reproduction.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Ingestion / OCR
+        - Retrieval / reranking
+        - Grounded generation / citations
+        - Evaluation
+        - Serving / API
+        - Frontend
+        - Observability / operations
+        - CI / containers / release
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, Python/Node versions, Docker/Compose versions, and relevant local/provider configuration names. Do not paste secrets.
+      placeholder: Ubuntu 24.04, Python 3.12, Docker 27.x, deterministic local provider, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or evidence
+      description: Add sanitized logs, traceback excerpts, request IDs, screenshots, or failing test names when useful.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed API keys, private corpus text, credentials, and other secrets from this report.
+          required: true
+        - label: I searched existing issues for the same problem.
+          required: true
