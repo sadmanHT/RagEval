@@ -1,0 +1,106 @@
+name: Release v0.2.0
+
+on:
+  workflow_run:
+    workflows: [CI, Frontend CI]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: release-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Skip when v0.2.0 already exists
+        id: existing
+        shell: bash
+        run: |
+          if gh release view v0.2.0 --repo "$REPO" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Require exact-head backend and frontend validation
+        id: gates
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CURRENT_MAIN="$(gh api "repos/$REPO/branches/main" --jq '.commit.sha')"
+          if [[ "$CURRENT_MAIN" != "$HEAD_SHA" ]]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Current main moved from validated SHA $HEAD_SHA to $CURRENT_MAIN; skipping release."
+            exit 0
+          fi
+
+          CI_CONCLUSION="$({ gh run list \
+            --repo "$REPO" \
+            --workflow ci.yml \
+            --branch main \
+            --event push \
+            --limit 20 \
+            --json headSha,status,conclusion; } | jq -r --arg sha "$HEAD_SHA" '[.[] | select(.headSha == $sha and .status == "completed")][0].conclusion // ""')"
+
+          FRONTEND_CONCLUSION="$({ gh run list \
+            --repo "$REPO" \
+            --workflow frontend.yml \
+            --branch main \
+            --event push \
+            --limit 20 \
+            --json headSha,status,conclusion; } | jq -r --arg sha "$HEAD_SHA" '[.[] | select(.headSha == $sha and .status == "completed")][0].conclusion // ""')"
+
+          echo "CI conclusion for $HEAD_SHA: ${CI_CONCLUSION:-missing}"
+          echo "Frontend CI conclusion for $HEAD_SHA: ${FRONTEND_CONCLUSION:-missing}"
+
+          if [[ "$CI_CONCLUSION" == "success" && "$FRONTEND_CONCLUSION" == "success" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish v0.2.0
+        if: >-
+          steps.existing.outputs.exists != 'true' &&
+          steps.gates.outputs.ready == 'true'
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
+          # RAG-Eval v0.2.0
+
+          Portfolio/product release built on top of the validated Phase 15 RAG system.
+
+          Highlights:
+          - thin Next.js product console for grounded queries, citations/evidence, evaluation runs, and system health;
+          - server-side BFF boundary so browser code never receives the FastAPI API key;
+          - dedicated frontend CI with TypeScript, production build, dependency/secret scans, Compose product smoke, and non-root runtime validation;
+          - polished white/black product UI with restrained blue/green semantics;
+          - real product and Grafana screenshots captured from the running stack;
+          - portfolio-oriented engineering case study, security policy, PR template, and repository presentation improvements.
+
+          Release acceptance requires both the complete backend/release CI and Frontend CI to succeed on this exact current `main` SHA before publication.
+
+          Evidence boundary: the committed deterministic/adversarial fixtures validate mechanics, provenance, grounding, orchestration, recovery, serving, observability, and release behavior. They do not establish a production retrieval winner, hosted-model quality level, production hallucination rate, or production SLO. The representative roughly 12,000-document corpus and target roughly 200-question reviewed evaluation set are not committed here.
+
+          See `README.md`, `docs/case-study.md`, `docs/implementation-state.md`, and `docs/phases/phase-15-report.md` for architecture, evidence, and limitations.
+          EOF
+
+          gh release create v0.2.0 \
+            --repo "$REPO" \
+            --target "$HEAD_SHA" \
+            --title "RAG-Eval v0.2.0" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
